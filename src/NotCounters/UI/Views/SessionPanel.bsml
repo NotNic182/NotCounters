@@ -1,0 +1,91 @@
+<bg bg='round-rect-panel' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
+
+  <tab-selector tab-tag='nc-session-tabs' anchor-min='0 1' anchor-max='1 1' pivot='0.5 1' size-delta='-8 6' anchor-pos-y='-1'
+                child-expand-width='true' child-control-width='true' />
+
+  <tab tags='nc-session-tabs' tab-name='Session' anchor-min='0 0' anchor-max='1 1' size-delta-y='-25' anchor-pos-y='4.5'>
+    <vertical anchor-min='0 0' anchor-max='1 1' size-delta='0 0' pad='2' spacing='1'
+              child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+              child-align='UpperCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+      <dropdown-list-setting id='environment-dropdown' text='Environment' pref-width='96' pref-height='8'
+                             value='selected-environment' choices='environment-options' apply-on-change='true'
+                             hover-hint='Picking another saves and reopens the editor there. Undo starts over.' />
+
+      <toggle-setting id='own-layout-toggle' text='This environment only' pref-width='96' pref-height='8'
+                      value='own-layout' apply-on-change='true'
+                      hover-hint="On: edits change only this environment's copy of the shared layout. Off: they change the shared one." />
+
+      <horizontal id='status-row' pref-width='96' pref-height='10' flexible-height='0' child-control-width='true' child-control-height='true' child-align='UpperLeft'>
+        <text id='status-text' text='' font-size='3.4' color='#FFFFFFCC' word-wrapping='true' align='TopLeft' rich-text='false' />
+      </horizontal>
+
+      <horizontal id='hint-text-row' pref-width='96' pref-height='15' flexible-height='0' child-control-width='true' child-control-height='true' child-align='UpperLeft'>
+        <text id='hint-text' text='' font-size='3.4' color='#FFD873' word-wrapping='true' align='TopLeft' rich-text='false' />
+      </horizontal>
+    </vertical>
+  </tab>
+
+  <tab tags='nc-session-tabs' tab-name='Profiles' anchor-min='0 0' anchor-max='1 1' size-delta-y='-25' anchor-pos-y='4.5'>
+    <vertical anchor-min='0 0' anchor-max='1 1' size-delta='0 0' pad='2' spacing='1'
+              child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+              child-align='UpperCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+      <dropdown-list-setting id='profile-dropdown' text='Active profile' pref-width='96' pref-height='8'
+                             value='selected-profile' choices='profile-options' apply-on-change='true' />
+      <string-setting id='profile-name' text='Name' pref-width='96' pref-height='8' value='profile-name' apply-on-change='true' />
+
+      <horizontal pref-width='96' pref-height='7' flexible-height='0' spacing='1'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='MiddleCenter'>
+        <button text='New' on-click='new-profile' pref-width='30' pref-height='7' font-size='3.8' />
+        <button text='Copy' on-click='duplicate-profile' pref-width='30' pref-height='7' font-size='3.8' />
+        <button id='delete-profile-button' text='Delete' on-click='ask-delete-profile' pref-width='30' pref-height='7' font-size='3.8' />
+      </horizontal>
+      <horizontal pref-width='96' pref-height='7' flexible-height='0'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='MiddleCenter'>
+        <button text='Reset profile to defaults' on-click='ask-reset-profile' pref-width='60' pref-height='7' font-size='3.8' />
+      </horizontal>
+    </vertical>
+  </tab>
+
+  <tab tags='nc-session-tabs' tab-name='Options' anchor-min='0 0' anchor-max='1 1' size-delta-y='-25' anchor-pos-y='4.5'>
+    <settings-container id='settings-container' anchor-min='0 0' anchor-max='1 1' size-delta='-2 0' />
+  </tab>
+
+  <vertical anchor-min='0 0' anchor-max='1 0' pivot='0.5 0' size-delta='-4 16' anchor-pos-y='1' spacing='1'
+            child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+            child-align='LowerCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+    <horizontal pref-width='96' pref-height='7' flexible-height='0' spacing='2'
+                child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                child-align='MiddleCenter'>
+      <button id='undo-button' text='Undo' on-click='undo' pref-width='30' pref-height='7' font-size='3.8' />
+      <button id='redo-button' text='Redo' on-click='redo' pref-width='30' pref-height='7' font-size='3.8' />
+      <button id='snap-button' text='Snap: Off' on-click='toggle-snap' pref-width='32' pref-height='7' font-size='3.8'
+              hover-hint='Snaps a dropped element to the grid, and a turned one to the angle step (Options tab).' />
+    </horizontal>
+    <horizontal pref-width='96' pref-height='7' flexible-height='0' spacing='2'
+                child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                child-align='MiddleCenter'>
+      <primary-button id='save-button' text='Save &amp; Exit' on-click='save-exit' pref-width='47' pref-height='7' font-size='3.8' />
+      <button id='discard-button' text='Discard &amp; Exit' on-click='discard-exit' pref-width='47' pref-height='7' font-size='3.8'
+              hover-hint='Throws away every change since you opened the editor, in every environment and on the Options tab.' />
+    </horizontal>
+  </vertical>
+
+  <modal id='confirm-modal' show-event='show-confirm' hide-event='hide-confirm' click-off-closes='true' move-to-center='true' size-delta-x='76' size-delta-y='32'>
+    <vertical anchor-min='0 0' anchor-max='1 1' size-delta='0 0' pad='3' spacing='2'
+              child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+              child-align='MiddleCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+      <horizontal pref-width='68' pref-height='14' flexible-height='0' child-control-width='true' child-control-height='true'>
+        <text id='confirm-text' text='' font-size='3.8' word-wrapping='true' align='Center' rich-text='false' />
+      </horizontal>
+      <horizontal pref-width='68' pref-height='7' flexible-height='0' spacing='2'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='MiddleCenter'>
+        <button text='Cancel' click-event='hide-confirm' pref-width='30' pref-height='7' />
+        <primary-button id='confirm-button' text='OK' on-click='confirm' pref-width='30' pref-height='7' />
+      </horizontal>
+    </vertical>
+  </modal>
+</bg>

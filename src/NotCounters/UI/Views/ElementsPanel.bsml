@@ -1,0 +1,83 @@
+<bg bg='round-rect-panel' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
+
+  <tab-selector tab-tag='nc-elements-tabs' anchor-min='0 1' anchor-max='1 1' pivot='0.5 1' size-delta='-8 6' anchor-pos-y='-1'
+                child-expand-width='true' child-control-width='true' />
+
+  <tab tags='nc-elements-tabs' tab-name='Elements' anchor-min='0 0' anchor-max='1 1' size-delta-y='-8' anchor-pos-y='-4'>
+    <vertical anchor-min='0 0' anchor-max='1 1' size-delta='0 0' pad='2' spacing='1'
+              child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+              child-align='UpperCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+
+      <horizontal pref-width='96' pref-height='64' flexible-height='0'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='UpperLeft'>
+        <list id='element-list' select-cell='element-selected' list-style='Simple' visible-cells='8' list-width='88' show-scrollbar='true' />
+      </horizontal>
+
+      <horizontal pref-width='96' pref-height='8' flexible-height='0' spacing='1'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='MiddleCenter'>
+        <button id='add-button' text='Add' on-click='show-add-modal' pref-width='23' pref-height='8' font-size='3.8' />
+        <button id='copy-button' text='Copy' on-click='copy-counter' pref-width='23' pref-height='8' font-size='3.8' />
+        <button id='remove-button' text='Remove' on-click='ask-remove' pref-width='23' pref-height='8' font-size='3.8' />
+        <button id='visibility-button' text='Hide' on-click='toggle-visibility' pref-width='23' pref-height='8' font-size='3.8'
+                hover-hint='Hidden elements stay in the list and show faintly in the editor, not in play.' />
+      </horizontal>
+    </vertical>
+  </tab>
+
+  <tab tags='nc-elements-tabs' tab-name='Settings' anchor-min='0 0' anchor-max='1 1' size-delta-y='-8' anchor-pos-y='-4'>
+    <horizontal anchor-min='0 1' anchor-max='1 1' pivot='0.5 1' size-delta='-4 8' anchor-pos-y='-0.5' spacing='2'
+                child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                child-align='MiddleLeft' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+
+      <horizontal pref-width='68' pref-height='8' flexible-height='0' child-control-width='true' child-control-height='true' child-align='MiddleLeft'>
+        <text id='settings-title' text='' font-size='5' align='MidlineLeft' overflow-mode='Ellipsis' rich-text='false' />
+      </horizontal>
+      <button id='reset-all-button' text='Reset all' on-click='ask-reset-all' pref-width='26' pref-height='7' font-size='3.8' />
+    </horizontal>
+
+    <settings-container id='form-container' anchor-min='0 0' anchor-max='1 1' size-delta='-2 -10' anchor-pos-y='-5' />
+  </tab>
+
+  <modal id='add-modal' show-event='show-add' hide-event='hide-add' click-off-closes='true' move-to-center='true' size-delta-x='92' size-delta-y='78'>
+    <vertical anchor-min='0 0' anchor-max='1 1' size-delta='0 0' pad='2' spacing='1'
+              child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+              child-align='UpperCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+      <horizontal pref-width='88' pref-height='6' flexible-height='0' child-control-width='true' child-control-height='true'>
+        <text text='Add element' font-size='5' align='Midline' />
+      </horizontal>
+      <horizontal pref-width='88' pref-height='42.5' flexible-height='0'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='UpperLeft'>
+        <list id='add-list' select-cell='add-choice-selected' list-style='List' visible-cells='5' list-width='80' expand-cell='true' show-scrollbar='true' />
+      </horizontal>
+      <horizontal pref-width='88' pref-height='15' flexible-height='0' child-control-width='true' child-control-height='true' child-align='UpperLeft'>
+        <text id='add-description' text='' font-size='3.4' color='#FFFFFFCC' word-wrapping='true' align='TopLeft' rich-text='false' />
+      </horizontal>
+      <horizontal pref-width='88' pref-height='7' flexible-height='0' spacing='2'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='MiddleCenter'>
+        <button text='Cancel' click-event='hide-add' pref-width='30' pref-height='7' />
+        <primary-button id='add-confirm-button' text='Add' on-click='add-selected' pref-width='30' pref-height='7' />
+      </horizontal>
+    </vertical>
+  </modal>
+
+  <modal id='confirm-modal' show-event='show-confirm' hide-event='hide-confirm' click-off-closes='true' move-to-center='true' size-delta-x='76' size-delta-y='36'>
+    <vertical anchor-min='0 0' anchor-max='1 1' size-delta='0 0' pad='3' spacing='2'
+              child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+              child-align='MiddleCenter' horizontal-fit='Unconstrained' vertical-fit='Unconstrained'>
+      <horizontal pref-width='68' pref-height='18' flexible-height='0' child-control-width='true' child-control-height='true'>
+        <text id='confirm-prompt' text='' font-size='3.8' word-wrapping='true' align='Center' rich-text='false' />
+      </horizontal>
+      <horizontal pref-width='68' pref-height='7' flexible-height='0' spacing='2'
+                  child-control-width='true' child-control-height='true' child-expand-width='false' child-expand-height='false'
+                  child-align='MiddleCenter'>
+        <button text='Cancel' click-event='hide-confirm' pref-width='30' pref-height='7' />
+        <primary-button id='confirm-button' text='Remove' on-click='confirm' pref-width='30' pref-height='7' />
+      </horizontal>
+    </vertical>
+  </modal>
+</bg>

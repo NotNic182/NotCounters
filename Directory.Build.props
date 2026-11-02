@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <BeatSaberDir Condition="'$(BeatSaberDir)' == '' and '$(BEAT_SABER_DIR)' != ''">$(BEAT_SABER_DIR)</BeatSaberDir>
+    <BeatSaberDir Condition="'$(BeatSaberDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..'))</BeatSaberDir>
+    <BeatSaberDir>$([MSBuild]::EnsureTrailingSlash('$(BeatSaberDir)'))</BeatSaberDir>
+    <BeatSaberManaged>$(BeatSaberDir)Beat Saber_Data\Managed\</BeatSaberManaged>
+    <BeatSaberPlugins>$(BeatSaberDir)Plugins\</BeatSaberPlugins>
+    <BeatSaberLibs>$(BeatSaberDir)Libs\</BeatSaberLibs>
+
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>

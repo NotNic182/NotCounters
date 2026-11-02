@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using NotCounters.Contracts;
 using NotCounters.Core.Config;
 using NotCounters.Core.Leaderboards;
 using NotCounters.Util;
-using OculusStudios.Platform.Core;
 using SiraUtil.Logging;
 using Zenject;
 
@@ -27,7 +28,7 @@ namespace NotCounters.Services
         private readonly IConfigService _config;
         private readonly LeaderboardRequestScheduler _scheduler;
         private readonly SiraLog _log;
-        private readonly IPlatform? _platform;
+        private readonly IPlatformUserModel? _platform;
         private readonly Board _beatLeader = new Board(LeaderboardService.BeatLeader);
         private readonly Board _scoreSaber = new Board(LeaderboardService.ScoreSaber);
 
@@ -37,10 +38,12 @@ namespace NotCounters.Services
 
         private string? _lastRawInputs;
 
+        private Task<UserInfo>? _userInfo;
+
         private bool _initialized;
         private bool _disposed;
 
-        public PlayerAccountService(IConfigService config, LeaderboardRequestScheduler scheduler, SiraLog log, [InjectOptional] IPlatform? platform)
+        public PlayerAccountService(IConfigService config, LeaderboardRequestScheduler scheduler, SiraLog log, [InjectOptional] IPlatformUserModel? platform)
         {
             _config = config;
             _scheduler = scheduler;
@@ -65,7 +68,7 @@ namespace NotCounters.Services
             _config.Changed += OnConfigChanged;
             if (_platform == null)
             {
-                _log.Warn("IPlatform is not bound; leaderboard accounts can only come from the overrides in the settings.");
+                _log.Warn("IPlatformUserModel is not bound; leaderboard accounts can only come from the overrides in the settings.");
             }
 
             Safe.Invoke(LogName + ".Initialize", () =>
@@ -310,13 +313,22 @@ namespace NotCounters.Services
 
         private ulong ReadPlatformUserId()
         {
-            IPlatform? platform = _platform;
+            IPlatformUserModel? platform = _platform;
             if (platform == null)
             {
                 return 0;
             }
 
-            return Safe.Invoke(LogName + ".PlatformUser", () => platform.user?.userId ?? 0UL, 0UL);
+            return Safe.Invoke(LogName + ".PlatformUser", () =>
+            {
+                Task<UserInfo> task = _userInfo ??= platform.GetUserInfo(CancellationToken.None);
+                if (task.IsFaulted || task.IsCanceled)
+                {
+                    _userInfo = null;
+                }
+
+                return task.Status == TaskStatus.RanToCompletion && ulong.TryParse(task.Result?.platformUserId, out ulong id) ? id : 0UL;
+            }, 0UL);
         }
 
         private string RawInputs()

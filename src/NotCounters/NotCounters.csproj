@@ -43,10 +43,9 @@
     <Reference Include="BeatSaber.GameSettings"><HintPath>$(BeatSaberManaged)BeatSaber.GameSettings.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="BeatSaber.ViewSystem" Publicize="true"><HintPath>$(BeatSaberManaged)BeatSaber.ViewSystem.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="BeatSaber.Settings"><HintPath>$(BeatSaberManaged)BeatSaber.Settings.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="BeatSaber.Destinations"><HintPath>$(BeatSaberManaged)BeatSaber.Destinations.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Interactable"><HintPath>$(BeatSaberManaged)Interactable.dll</HintPath><Private>false</Private></Reference>
 
-    <Reference Include="OculusStudios.Platform.Core"><HintPath>$(BeatSaberManaged)OculusStudios.Platform.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="PlatformUserModel"><HintPath>$(BeatSaberManaged)PlatformUserModel.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Zenject"><HintPath>$(BeatSaberManaged)Zenject.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Zenject-usage"><HintPath>$(BeatSaberManaged)Zenject-usage.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.TextMeshPro"><HintPath>$(BeatSaberManaged)Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>

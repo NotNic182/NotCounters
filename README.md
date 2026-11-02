@@ -1,6 +1,6 @@
 # NotCounters
 
-HUD mod for Beat Saber 1.44.1. You can move, resize and restyle the vanilla HUD and add your own counters (accuracy,
+HUD mod for Beat Saber 1.40.8. You can move, resize and restyle the vanilla HUD and add your own counters (accuracy,
 misses, PB, notes left, BeatLeader/ScoreSaber pp and a bunch more). Everything is set up in a live editor that runs in
 the actual game environment, so you see exactly what it looks like in play.
 
@@ -30,7 +30,7 @@ Settings are saved in `UserData/NotCounters/`.
 
 ## Building
 
-Needs the .NET SDK and a Beat Saber 1.44.1 install with the mods above.
+Needs the .NET SDK and a Beat Saber 1.40.8 install with the mods above.
 
 ```
 dotnet build NotCounters.sln -c Release

@@ -391,7 +391,7 @@ namespace NotCounters.Hud
             go.SetActive(true);
 
             // after Awake, TMP turns word wrapping back on when it loads its defaults
-            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Overflow;
             text.raycastTarget = false;
             text.richText = false;

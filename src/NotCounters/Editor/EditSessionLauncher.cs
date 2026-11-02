@@ -728,11 +728,14 @@ namespace NotCounters.Editor
                     overrideSettings,
                     colorSchemes.GetOverrideColorScheme(),
                     colorSchemes.ShouldOverrideLightshowColors(),
+                    level.GetColorScheme(beatmapKey.beatmapCharacteristic, beatmapKey.difficulty),
                     modifiers,
                     playerSettings,
                     practice,
                     _environments,
-                    new GameplayAdditionalInformation(PauseMenuBackButtonText),
+                    PauseMenuBackButtonText,
+                    useTestNoteCutSoundEffects: false,
+                    startPaused: false,
                     beforeSceneSwitchToGameplayCallback: null,
                     afterSceneSwitchToGameplayCallback: null,
                     levelFinishedCallback: HandleLevelFinished,
@@ -816,7 +819,7 @@ namespace NotCounters.Editor
                     return;
                 }
 
-                var setupData = _transitions.standardLevelScenesTransitionSetupData;
+                var setupData = _transitions._standardLevelScenesTransitionSetupData;
                 if (setupData == null)
                 {
                     return;
@@ -850,7 +853,7 @@ namespace NotCounters.Editor
         {
             Safe.Invoke("EditSessionLauncher.InstallEarlyBindings", () =>
             {
-                if (!_state.IsActive || !ReferenceEquals(setupData, _transitions.standardLevelScenesTransitionSetupData))
+                if (!_state.IsActive || !ReferenceEquals(setupData, _transitions._standardLevelScenesTransitionSetupData))
                 {
                     return;
                 }

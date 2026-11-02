@@ -39,7 +39,6 @@ namespace NotCounters.Editor
         private readonly IEditableElementRegistry? _registry;
         private readonly IHudAnchorProvider? _anchorProvider;
         private readonly VRInputModule? _inputModule;
-        private readonly PauseMenuManager? _pauseMenuManager;
         private readonly IFPFCSettings? _fpfcSettings;
         private readonly MainCamera? _mainCamera;
 
@@ -65,7 +64,6 @@ namespace NotCounters.Editor
             [InjectOptional] IEditableElementRegistry? registry,
             [InjectOptional] IHudAnchorProvider? anchorProvider,
             [InjectOptional] VRInputModule? inputModule,
-            [InjectOptional] PauseMenuManager? pauseMenuManager,
             [InjectOptional] IFPFCSettings? fpfcSettings,
             [InjectOptional] MainCamera? mainCamera)
         {
@@ -79,7 +77,6 @@ namespace NotCounters.Editor
             _registry = registry;
             _anchorProvider = anchorProvider;
             _inputModule = inputModule;
-            _pauseMenuManager = pauseMenuManager;
             _fpfcSettings = fpfcSettings;
             _mainCamera = mainCamera;
             _updateGrab = UpdateGrab;
@@ -627,16 +624,7 @@ namespace NotCounters.Editor
 
         private VRController? ResolvePointerController()
         {
-            VRPointer? pointer = null;
-            if (_inputModule != null && _inputModule._vrPointer != null)
-            {
-                pointer = _inputModule._vrPointer;
-            }
-            else if (_pauseMenuManager != null && _pauseMenuManager._vrPointer != null)
-            {
-                pointer = _pauseMenuManager._vrPointer;
-            }
-
+            var pointer = _inputModule != null ? _inputModule._vrPointer : null;
             var controller = pointer != null ? pointer.lastSelectedVrController : null;
             return controller != null && controller.active ? controller : null;
         }

@@ -7,6 +7,7 @@ using NotCounters.Util;
 using SiraUtil.Logging;
 using SiraUtil.Submissions;
 using UnityEngine;
+using VRUIControls;
 using Zenject;
 
 namespace NotCounters.Editor
@@ -68,7 +69,8 @@ namespace NotCounters.Editor
             [InjectOptional] ILevelStartController? levelStart,
             [InjectOptional] IAudioTimeSource? audioTime,
             [InjectOptional] IMenuButtonTrigger? menuButtonTrigger,
-            [InjectOptional] GameScenesManager? scenes)
+            [InjectOptional] GameScenesManager? scenes,
+            [InjectOptional] VRInputModule? inputModule)
         {
             _log = log;
             _state = state;
@@ -83,7 +85,7 @@ namespace NotCounters.Editor
             _menuButtonTrigger = menuButtonTrigger;
 
             _scenes = scenes;
-            _freezer = new PauseMenuFreezer(pauseController, pauseMenuManager, gamePause);
+            _freezer = new PauseMenuFreezer(pauseController, pauseMenuManager, gamePause, inputModule);
             _history = new UndoHistory<HudConfig>(_config.CreateSnapshot);
         }
 
@@ -620,12 +622,11 @@ namespace NotCounters.Editor
 
         private float SongTime => _audioTime != null ? _audioTime.songTime : 0f;
 
-        private bool IsSongPlaying() => _audioTime != null && _audioTime.state == IAudioTimeSource.State.Playing;
+        private bool IsSongPlaying() => _audioTime is AudioTimeSyncController sync && sync.state == AudioTimeSyncController.State.Playing;
 
         private bool IsNearSongEnd() =>
-            _audioTime != null
-            && _audioTime.state == IAudioTimeSource.State.Playing
-            && _audioTime.songEndTime > 0f
+            IsSongPlaying()
+            && _audioTime!.songEndTime > 0f
             && _audioTime.songTime >= _audioTime.songEndTime - SongEndMarginSeconds;
 
         private void SetPhase(Phase phase)

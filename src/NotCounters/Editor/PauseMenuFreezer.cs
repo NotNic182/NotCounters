@@ -12,17 +12,19 @@ namespace NotCounters.Editor
         private readonly PauseController? _pauseController;
         private readonly PauseMenuManager? _pauseMenuManager;
         private readonly IGamePause? _gamePause;
+        private readonly VRInputModule? _inputModule;
 
         private GameObject? _hiddenCanvas;
         private bool _hiddenCanvasWasActive;
         private bool _menuManagerDisabled;
         private bool _menuManagerWasEnabled;
 
-        public PauseMenuFreezer(PauseController? pauseController, PauseMenuManager? pauseMenuManager, IGamePause? gamePause)
+        public PauseMenuFreezer(PauseController? pauseController, PauseMenuManager? pauseMenuManager, IGamePause? gamePause, VRInputModule? inputModule)
         {
             _pauseController = pauseController;
             _pauseMenuManager = pauseMenuManager;
             _gamePause = gamePause;
+            _inputModule = inputModule;
         }
 
         public bool CanFreeze => _pauseController != null && _pauseMenuManager != null;
@@ -40,7 +42,7 @@ namespace NotCounters.Editor
             }
         }
 
-        public VRPointer? PausePointer => _pauseMenuManager != null ? _pauseMenuManager._vrPointer : null;
+        public VRPointer? PausePointer => _inputModule != null ? _inputModule._vrPointer : null;
 
         public bool IsPausePointerReady
         {

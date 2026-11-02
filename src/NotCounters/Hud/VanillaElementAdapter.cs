@@ -322,7 +322,7 @@ namespace NotCounters.Hud
                 ? Mathf.Clamp(s.FontSizeMultiplier, ConfigValidator.MinFontSizeMultiplier, ConfigValidator.MaxFontSizeMultiplier)
                 : 1f;
 
-            var wrapping = sizeMultiplier > 1f ? TextWrappingModes.NoWrap : (TextWrappingModes?)null;
+            var wrapping = sizeMultiplier > 1f ? false : (bool?)null;
             var outlineWidth = d == null || d.SupportsOutline ? s.OutlineWidth : 0f;
 
             foreach (var part in _texts)
@@ -335,10 +335,10 @@ namespace NotCounters.Hud
                 var color = part.Role == VanillaColorRole.Primary ? primary : secondary;
                 part.Text.color = color is ColorValue c ? HudMath.Tint(c, part.OriginalColor.a) : part.OriginalColor;
                 part.Text.fontSize = part.OriginalFontSize * sizeMultiplier;
-                var wrap = wrapping ?? part.OriginalWrappingMode;
-                if (part.Text.textWrappingMode != wrap)
+                var wrap = wrapping ?? part.OriginalWordWrapping;
+                if (part.Text.enableWordWrapping != wrap)
                 {
-                    part.Text.textWrappingMode = wrap;
+                    part.Text.enableWordWrapping = wrap;
                 }
 
                 if (part.OriginalMaterial != null)
@@ -533,7 +533,7 @@ namespace NotCounters.Hud
                 OriginalFontSize = text.fontSize;
                 OriginalColor = text.color;
                 OriginalMaterial = text.fontSharedMaterial;
-                OriginalWrappingMode = text.textWrappingMode;
+                OriginalWordWrapping = text.enableWordWrapping;
                 AuthoredItalic = HudTextUniformity.IsItalic((int)text.fontStyle);
                 var scale = text.rectTransform.localScale;
                 OriginalScaleX = scale.x;
@@ -547,7 +547,7 @@ namespace NotCounters.Hud
 
             public float OriginalFontSize { get; }
 
-            public TextWrappingModes OriginalWrappingMode { get; }
+            public bool OriginalWordWrapping { get; }
 
             public Color OriginalColor { get; }
 

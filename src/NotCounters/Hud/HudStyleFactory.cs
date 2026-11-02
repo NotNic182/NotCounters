@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using BeatSaberMarkupLanguage;
 using NotCounters.Core.Config;
 using NotCounters.Util;
 using SiraUtil.Logging;
@@ -148,7 +147,6 @@ namespace NotCounters.Hud
             Safe.Invoke("hud:style-text", () =>
             {
                 if (TryFromVanillaHud(out _font, out _textMaterial)
-                    || TryFromBsml(out _font, out _textMaterial)
                     || TryByName(out _font, out _textMaterial))
                 {
                     _log.Debug($"Counter font: {_font!.name}, material: {_textMaterial!.name}");
@@ -226,11 +224,6 @@ namespace NotCounters.Hud
 
         private Material Unwrap(Material material) =>
             _cloneBases.TryGetValue(material.GetInstanceID(), out var original) && original != null ? original : material;
-
-        private static bool TryFromBsml(out TMP_FontAsset? font, out Material? material)
-        {
-            return Accept(BeatSaberUI.MainTextFont, BeatSaberUI.MainFlatUIFontMaterial, out font, out material);
-        }
 
         private static bool TryByName(out TMP_FontAsset? font, out Material? material)
         {

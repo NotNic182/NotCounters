@@ -127,7 +127,7 @@ namespace NotCounters.Editor
             label.color = color;
             label.richText = false;
             label.raycastTarget = false;
-            label.textWrappingMode = TextWrappingModes.NoWrap;
+            label.enableWordWrapping = false;
             label.overflowMode = TextOverflowModes.Ellipsis;
             return label;
         }

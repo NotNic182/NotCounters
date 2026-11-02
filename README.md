@@ -4,6 +4,13 @@ HUD mod for Beat Saber 1.44.1. You can move, resize and restyle the vanilla HUD 
 misses, PB, notes left, BeatLeader/ScoreSaber pp and a bunch more). Everything is set up in a live editor that runs in
 the actual game environment, so you see exactly what it looks like in play.
 
+<img width="2560" height="2560" alt="Untitled-1" src="https://github.com/user-attachments/assets/18302a84-7897-4c84-a94d-3eb9eba7068e" />
+
+<img width="2560" height="1440" alt="vlcsnap-2026-11-02-13h38m01s704" src="https://github.com/user-attachments/assets/b24ebed2-c086-4029-8234-40e82933835c" />
+
+<img width="2560" height="1440" alt="vlcsnap-2026-11-02-13h38m19s753" src="https://github.com/user-attachments/assets/8028123c-85f1-4644-877f-57ae1d28f0eb" />
+
+
 ## Install
 
 Needs BSIPA, BSML and SiraUtil.

@@ -3,7 +3,7 @@
   "id": "NotCounters",
   "name": "NotCounters",
   "author": "thejokehive",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Edit the vanilla HUD and place configurable counters (accuracy, misses, PB, notes left, BeatLeader and ScoreSaber PP, and more) anywhere around you, with a live preview in any environment.",
   "gameVersion": "1.44.1",
   "dependsOn": {

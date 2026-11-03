@@ -17,7 +17,7 @@ namespace NotCounters.Hud
         Secondary,
     }
 
-    internal sealed class VanillaElementAdapter : IEditableElement
+    internal sealed class VanillaElementAdapter : IEditableElement, IHudFollowElement
     {
         private readonly Transform _frame;
         private readonly HudStyleFactory _styles;
@@ -227,17 +227,40 @@ namespace NotCounters.Hud
         {
             var pose = GetPose();
             var settings = GetOrCreateSettings(editableLayout);
-            var inverse = Quaternion.Inverse(_authoredRotation);
-            settings.PositionOffset = HudMath.ToConfigPosition(inverse * (pose.Position - _authoredPosition) / _offsetScale);
-            settings.RotationOffset = HudMath.ToConfigEuler(inverse * pose.Rotation);
-            settings.Scale = HudMath.ToConfigScale(pose.Scale);
+            if (settings.MoveWithHud)
+            {
+                var inverse = Quaternion.Inverse(_authoredRotation);
+                settings.PositionOffset = HudMath.ToConfigPosition(inverse * (pose.Position - _authoredPosition) / _offsetScale);
+                settings.RotationOffset = HudMath.ToConfigEuler(inverse * pose.Rotation);
+                settings.Scale = HudMath.ToConfigScale(pose.Scale);
+            }
+            else
+            {
+                settings.PositionOffset = HudMath.ToConfigPosition(pose.Position);
+                settings.RotationOffset = HudMath.ToConfigEuler(pose.Rotation);
+                settings.Scale = HudMath.ToConfigScale(pose.Scale * _offsetScale);
+            }
+
             settings.Visible = _settings.Visible;
             _settings = settings;
+        }
+
+        public void SetMoveWithHud(HudLayout editableLayout, bool moveWithHud)
+        {
+            var settings = GetOrCreateSettings(editableLayout);
+            if (settings.MoveWithHud == moveWithHud)
+            {
+                return;
+            }
+
+            settings.MoveWithHud = moveWithHud;
+            CommitToConfig(editableLayout);
         }
 
         public void ResetToDefault(HudLayout editableLayout)
         {
             var settings = GetOrCreateSettings(editableLayout);
+            settings.MoveWithHud = true;
             settings.PositionOffset = Vec3.Zero;
             settings.RotationOffset = Vec3.Zero;
             settings.Scale = 1f;
@@ -266,10 +289,15 @@ namespace NotCounters.Hud
 
         private void ApplyPose(VanillaElementSettings settings)
         {
-            var position = _authoredPosition + (_authoredRotation * (settings.PositionOffset.ToUnity() * _offsetScale));
-            var rotation = _authoredRotation * Quaternion.Euler(settings.RotationOffset.ToUnity());
+            var follow = settings.MoveWithHud;
+            var position = follow
+                ? _authoredPosition + (_authoredRotation * (settings.PositionOffset.ToUnity() * _offsetScale))
+                : settings.PositionOffset.ToUnity();
+            var rotation = follow
+                ? _authoredRotation * Quaternion.Euler(settings.RotationOffset.ToUnity())
+                : Quaternion.Euler(settings.RotationOffset.ToUnity());
             Root.SetPositionAndRotation(_frame.TransformPoint(position), _frame.rotation * rotation);
-            Root.localScale = _authoredScale * settings.Scale;
+            Root.localScale = _authoredScale * (follow ? settings.Scale : settings.Scale / _offsetScale);
         }
 
         private void ApplyVisibility()

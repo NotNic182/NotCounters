@@ -123,6 +123,9 @@ namespace NotCounters.Core.Config
 
         public float Scale { get; set; } = 1f;
 
+        // off: PositionOffset/RotationOffset are a fixed place from the play area center, same in every environment
+        public bool MoveWithHud { get; set; } = true;
+
         public ColorValue? PrimaryColor { get; set; }
 
         public ColorValue? SecondaryColor { get; set; }

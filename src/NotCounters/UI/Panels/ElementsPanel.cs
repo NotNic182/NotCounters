@@ -127,7 +127,8 @@ namespace NotCounters.UI.Panels
                 step => _step = step,
                 Reattach,
                 _grab.ResetSelected,
-                () => _session.IsEditing && _selection.Selected != null);
+                () => _session.IsEditing && _selection.Selected != null,
+                SetMoveWithHud);
         }
 
         public string Name => "NotCountersElementsPanel";
@@ -737,6 +738,21 @@ namespace NotCounters.UI.Panels
             }
 
             _formNeedsReload = true;
+        }
+
+        private void SetMoveWithHud(VanillaElementSettings settings, bool moveWithHud)
+        {
+            if (_selection.Selected is IHudFollowElement element && ReferenceEquals(settings, _formTarget))
+            {
+                element.SetMoveWithHud(_session.GetEditableLayout(), moveWithHud);
+            }
+            else
+            {
+                settings.MoveWithHud = moveWithHud;
+            }
+
+            // rebuild so the rows say Offset or Position
+            _formTarget = null;
         }
 
         private List<FormField> BuildFields(object target, string id) => target switch

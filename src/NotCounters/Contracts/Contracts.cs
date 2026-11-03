@@ -233,6 +233,11 @@ namespace NotCounters.Contracts
         void Reattach(CounterSettings settings, CounterAttachment attachment);
     }
 
+    public interface IHudFollowElement
+    {
+        void SetMoveWithHud(HudLayout editableLayout, bool moveWithHud);
+    }
+
     public interface IEditableElementRegistry
     {
         System.Collections.Generic.IReadOnlyList<IEditableElement> Elements { get; }

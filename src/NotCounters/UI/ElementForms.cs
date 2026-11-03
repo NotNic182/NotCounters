@@ -22,19 +22,22 @@ namespace NotCounters.UI
         private readonly Action<CounterSettings, CounterAttachment>? _reattach;
         private readonly Action? _resetPlacement;
         private readonly Func<bool>? _canResetPlacement;
+        private readonly Action<VanillaElementSettings, bool>? _setMoveWithHud;
 
         public ElementFormContext(
             Func<AdjustStep> getStep,
             Action<AdjustStep> setStep,
             Action<CounterSettings, CounterAttachment>? reattach = null,
             Action? resetPlacement = null,
-            Func<bool>? canResetPlacement = null)
+            Func<bool>? canResetPlacement = null,
+            Action<VanillaElementSettings, bool>? setMoveWithHud = null)
         {
             _getStep = getStep;
             _setStep = setStep;
             _reattach = reattach;
             _resetPlacement = resetPlacement;
             _canResetPlacement = canResetPlacement;
+            _setMoveWithHud = setMoveWithHud;
         }
 
         public AdjustStep Step
@@ -67,6 +70,23 @@ namespace NotCounters.UI
             else
             {
                 counter.Attachment = attachment;
+            }
+        }
+
+        public void SetMoveWithHud(VanillaElementSettings element, bool moveWithHud)
+        {
+            if (element.MoveWithHud == moveWithHud)
+            {
+                return;
+            }
+
+            if (_setMoveWithHud != null)
+            {
+                _setMoveWithHud(element, moveWithHud);
+            }
+            else
+            {
+                element.MoveWithHud = moveWithHud;
             }
         }
     }
@@ -128,6 +148,12 @@ namespace NotCounters.UI
             new ChoiceItem(nameof(CounterAttachment.None), "Off (stays put)"),
         };
 
+        private static readonly IReadOnlyList<ChoiceItem> MoveWithHudChoices = new[]
+        {
+            new ChoiceItem(bool.TrueString, "On"),
+            new ChoiceItem(bool.FalseString, "Off (stays put)"),
+        };
+
         public static double PositionStep(AdjustStep step) => step switch
         {
             AdjustStep.Fine => 0.01,
@@ -155,14 +181,25 @@ namespace NotCounters.UI
 
             if (d == null || d.SupportsPose)
             {
-                fields.Add(new SectionField("Placement (offset from vanilla)"));
+                var follow = s.MoveWithHud;
+                fields.Add(new SectionField(follow ? "Placement (offset from vanilla)" : "Placement"));
                 fields.Add(StepField(ctx));
-                fields.AddRange(PositionFields("Offset", () => s.PositionOffset, v => s.PositionOffset = v, ctx));
+                fields.Add(new ChoiceField(
+                    "Move with the HUD",
+                    MoveWithHudChoices,
+                    () => s.MoveWithHud.ToString(),
+                    key => ctx.SetMoveWithHud(s, key == bool.TrueString))
+                {
+                    HoverHint = "On: moves with the game's HUD in each environment, like vanilla. Off: stays in the same place in every environment.",
+                });
+                fields.AddRange(follow
+                    ? PositionFields("Offset", () => s.PositionOffset, v => s.PositionOffset = v, ctx)
+                    : PositionFields("Position", () => s.PositionOffset, v => s.PositionOffset = v, ctx, "From the center of your play area, at floor level."));
                 fields.AddRange(RotationFields(() => s.RotationOffset, v => s.RotationOffset = v, ctx));
                 fields.Add(ScaleField(() => s.Scale, v => s.Scale = v, ctx));
                 fields.Add(ResetPlacementField(
                     "Reset placement",
-                    "Back to where the game puts it: no offset or rotation, scale 1.00x.",
+                    "Back to where the game puts it: Move with the HUD on, no offset or rotation, scale 1.00x.",
                     ctx));
             }
 

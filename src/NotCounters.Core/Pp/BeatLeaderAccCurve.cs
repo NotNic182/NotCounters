@@ -75,8 +75,8 @@ namespace NotCounters.Core.Pp
                 if (shape != null)
                 {
                     double sb = BeatLeaderSmoothBase.ValueAt(x);
-                    double reference = StandardShape.ValueAt(x);
-                    v = reference > 0 ? Math.Min(sb, sb * shape.ValueAt(x) / reference) : sb;
+                    double factor = shape.A < C.PerMapMaxPredictedAcc && x > shape.A ? TopTableFactor(shape.A, x) : TableFactor(x);
+                    v = factor > 0 ? Math.Min(sb, shape.ValueAt(x) * factor) : sb;
                 }
                 else
                 {
@@ -123,6 +123,19 @@ namespace NotCounters.Core.Pp
             }
 
             return new CurveParameterRow(r.PredictedAcc, r.A, Math.Min(r.C, C.ShapeCMax), r.K, r.W, r.K2, r.P2);
+        }
+
+        private static double TableFactor(double x)
+        {
+            double reference = StandardShape.ValueAt(x);
+            return reference > 0 ? BeatLeaderSmoothBase.ValueAt(x) / reference : 0;
+        }
+
+        private static double TopTableFactor(double a, double x)
+        {
+            double atA = TableFactor(a);
+            double slope = (atA - TableFactor(a - C.TopFactorStep)) / C.TopFactorStep;
+            return atA + slope * (x - a);
         }
 
         private static List<double> BuildGrid(double shapeA)

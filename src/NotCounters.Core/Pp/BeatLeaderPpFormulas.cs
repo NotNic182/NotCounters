@@ -33,7 +33,7 @@ namespace NotCounters.Core.Pp
         public static double NoteFactor(double notes)
         {
             if (!(notes > 0) || notes >= C.LowNoteStart) return 1;
-            double f = 1 - C.LowNoteNerf * Math.Log(C.LowNoteStart / notes) / Math.Log(C.LowNoteStart / C.LowNoteReference);
+            double f = 1 - (1 - C.LowNoteFloor) * Math.Log(C.LowNoteStart / notes) / Math.Log(C.LowNoteStart / C.LowNoteReference);
             return PpNumerics.Clamp(f, C.LowNoteFloor, 1);
         }
 
@@ -77,27 +77,46 @@ namespace NotCounters.Core.Pp
             return PpNumerics.IsFinite(r) && r >= 0 ? r : 0;
         }
 
+        public static double PassAccMultiplier(double accuracy, double predictedAcc)
+        {
+            if (!(predictedAcc > 0)) return 1;
+            double gap = accuracy - (predictedAcc - C.PassAccErrorOffset * (1 - predictedAcc));
+            return PpNumerics.Clamp(Math.Exp(C.PassAccExponent * gap), C.PassAccMinMultiplier, C.PassAccMaxMultiplier);
+        }
+
         public static double AccPp(double curveValue, double accRating)
         {
             if (!(accRating > 0)) return 0;
-            double r = curveValue * C.AccWeight * Math.Pow(accRating, C.AccRatingPower);
-            return PpNumerics.FiniteOr(r, 0);
+            return PpNumerics.FiniteOr(curveValue * C.AccWeight * accRating, 0);
         }
 
-        public static double TechPp(double accuracy, double techRating)
+        public static double MidStarMultiplier(double stars, double accuracy, double predictedAcc)
+        {
+            if (!(predictedAcc > 0)) return 1;
+            double from = predictedAcc - C.MidStarAccBelow;
+            if (!(accuracy > from)) return 1;
+            double bump = MidStarBump(stars);
+            if (bump == 0) return 1;
+            return 1 + C.MidStarBonus * bump * Ease((accuracy - from) / (C.MidStarAccBelow + C.MidStarAccAbove));
+        }
+
+        public static double MidStarBump(double stars)
+        {
+            if (!(stars > C.MidStarStart && stars < C.MidStarEnd)) return 0;
+            if (stars < C.MidStarFull) return Ease((stars - C.MidStarStart) / (C.MidStarFull - C.MidStarStart));
+            if (stars > C.MidStarFullEnd) return Ease((C.MidStarEnd - stars) / (C.MidStarEnd - C.MidStarFullEnd));
+            return 1;
+        }
+
+        public static double TechPp(double techRating)
         {
             if (!(techRating > 0)) return 0;
             double t = techRating;
             if (t > C.TechTopKnee) t = C.TechTopKnee + (t - C.TechTopKnee) * C.TechTopSlope;
-            double r = Math.Exp(C.TechAccExponent * accuracy) * C.TechWeight * Math.Pow(t, C.TechRatingPower);
-            return PpNumerics.FiniteOr(r, 0);
+            return PpNumerics.FiniteOr(C.TechWeight * t, 0);
         }
 
-        public static double RawStars(double pp96)
-        {
-            double b = pp96 / C.StarDivisor;
-            return b > 0 ? C.StarScale * Math.Pow(b, C.StarExponent) : b;
-        }
+        public static double RawStars(double pp96) => pp96 / C.StarDivisor;
 
         public static double StarsFromPp(double pp96)
         {
@@ -115,10 +134,10 @@ namespace NotCounters.Core.Pp
             return (lo + hi) / 2;
         }
 
-        public static double Stars(double accRating, double passRating, double techRating, BeatLeaderAccCurve? curve)
+        public static double Stars(double accRating, double passRating, double techRating, BeatLeaderAccCurve? curve, double predictedAcc)
         {
             double c96 = curve?.ValueAt(C.StarAccuracy) ?? 0;
-            double pp96 = PassPp(passRating) + AccPp(c96, accRating) + TechPp(C.StarAccuracy, techRating);
+            double pp96 = PassPp(passRating) * PassAccMultiplier(C.StarAccuracy, predictedAcc) + AccPp(c96, accRating) + TechPp(techRating);
             return StarsFromPp(pp96);
         }
 
@@ -162,6 +181,12 @@ namespace NotCounters.Core.Pp
         {
             double r = C.LegacyInflationBase * Math.Pow(sum, C.LegacyInflationPower) / Math.Pow(C.LegacyInflationBase, C.LegacyInflationPower);
             return PpNumerics.FiniteOr(r, 0);
+        }
+
+        private static double Ease(double t)
+        {
+            double c = PpNumerics.Clamp(t, 0, 1);
+            return c * c * (3 - 2 * c);
         }
 
         internal static double TryGetModifierValue(IReadOnlyDictionary<string, double> values, string code)

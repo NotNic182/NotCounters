@@ -39,6 +39,7 @@ namespace NotCounters.Core.Pp
             CurvePower = p.CurvePower;
             LowStarMultiplier = p.Lsm;
             Curve96 = p.C96;
+            PredictedAcc = p.PredictedAcc;
             HasStarDrift = p.Drift;
             _passPpConstant = p.PassPp;
         }
@@ -82,6 +83,8 @@ namespace NotCounters.Core.Pp
         public double LowStarMultiplier { get; }
 
         public double Curve96 { get; }
+
+        public double PredictedAcc { get; }
 
         public bool IsApproximate => IsLegacy || HasStarDrift;
 
@@ -147,9 +150,10 @@ namespace NotCounters.Core.Pp
                 cv = Curve96 * Math.Pow(cv / Curve96, CurvePower);
             }
 
-            double p = _passPpConstant;
-            double a = BeatLeaderPpFormulas.AccPp(cv, AccRating * ModifierMultiplier);
-            double t = BeatLeaderPpFormulas.TechPp(accuracy, TechRating * ModifierMultiplier);
+            double p = _passPpConstant * BeatLeaderPpFormulas.PassAccMultiplier(accuracy, PredictedAcc);
+            double a = BeatLeaderPpFormulas.AccPp(cv, AccRating * ModifierMultiplier)
+                       * BeatLeaderPpFormulas.MidStarMultiplier(Stars, accuracy, PredictedAcc);
+            double t = BeatLeaderPpFormulas.TechPp(TechRating * ModifierMultiplier);
             return Combine(p, a, t, C.PpMultiplier * (p + a + t) * LowStarMultiplier);
         }
 
@@ -226,7 +230,7 @@ namespace NotCounters.Core.Pp
                     if (C.SpeedTimescales.TryGetValue(code, out double timescale))
                     {
                         pa = d.GetModifierRating(code, "PredictedAcc");
-                        slider = d.GetModifierRating(code, "SliderPercentage");
+                        slider = d.GetModifierRating(code, "SliderPercentage") ?? d.SliderPercentage;
                         span = PpNumerics.FiniteOr(d.NoteSpan, 0) / timescale;
                     }
 
@@ -247,8 +251,9 @@ namespace NotCounters.Core.Pp
                 return p;
             }
 
+            p.PredictedAcc = PpNumerics.FiniteOr(pa, 0);
             p.Curve = BeatLeaderAccCurve.Build(pa, slider, d.Notes, span);
-            p.Stars = BeatLeaderPpFormulas.Stars(p.Acc, p.Pass, p.Tech, p.Curve);
+            p.Stars = BeatLeaderPpFormulas.Stars(p.Acc, p.Pass, p.Tech, p.Curve, p.PredictedAcc);
             p.C96 = p.Curve.ValueAt(C.StarAccuracy);
             p.CurvePower = BeatLeaderPpFormulas.CurvePower(p.Stars);
             p.Lsm = BeatLeaderPpFormulas.LowStarMultiplier(p.Stars);
@@ -277,7 +282,7 @@ namespace NotCounters.Core.Pp
             public string RatingSet = string.Empty;
             public double Acc, Pass, Tech, Mp = 1, DisplayMp = 1;
             public BeatLeaderAccCurve? Curve;
-            public double Stars, CurvePower = 1, Lsm = 1, C96, PassPp;
+            public double Stars, CurvePower = 1, Lsm = 1, C96, PassPp, PredictedAcc;
             public double? ApiStars;
             public bool Drift;
         }

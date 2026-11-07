@@ -3,7 +3,7 @@
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>NotCounters</RootNamespace>
     <AssemblyName>NotCounters</AssemblyName>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <DebugType>portable</DebugType>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

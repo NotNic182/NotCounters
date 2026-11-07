@@ -74,7 +74,8 @@ namespace NotCounters.Core.Pp
                         PpNumerics.FiniteOr(difficulty.AccRating, 0),
                         PpNumerics.FiniteOr(difficulty.PassRating, 0),
                         PpNumerics.FiniteOr(difficulty.TechRating, 0),
-                        curve);
+                        curve,
+                        PpNumerics.FiniteOr(difficulty.PredictedAcc, 0));
                 }
 
                 if (!difficulty.HasModifierRating(set, "AccRating")) return null;
@@ -82,7 +83,7 @@ namespace NotCounters.Core.Pp
                 if (C.SpeedTimescales.TryGetValue(set, out double timescale))
                 {
                     pa = difficulty.GetModifierRating(set, "PredictedAcc");
-                    slider = difficulty.GetModifierRating(set, "SliderPercentage");
+                    slider = difficulty.GetModifierRating(set, "SliderPercentage") ?? difficulty.SliderPercentage;
                     span = PpNumerics.FiniteOr(difficulty.NoteSpan, 0) / timescale;
                 }
 
@@ -91,7 +92,8 @@ namespace NotCounters.Core.Pp
                     PpNumerics.FiniteOr(difficulty.GetModifierRating(set, "AccRating"), 0),
                     PpNumerics.FiniteOr(difficulty.GetModifierRating(set, "PassRating"), 0),
                     PpNumerics.FiniteOr(difficulty.GetModifierRating(set, "TechRating"), 0),
-                    speedCurve);
+                    speedCurve,
+                    PpNumerics.FiniteOr(pa, 0));
             }
             catch (Exception)
             {

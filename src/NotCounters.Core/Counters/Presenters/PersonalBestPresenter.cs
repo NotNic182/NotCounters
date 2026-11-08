@@ -32,7 +32,7 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.Bool(CounterOptionKeys.ShowScore, "Show PB score", false, "Show the score of your personal best."),
                     OptionBuilder.Grouping(CounterChoices.GroupingSpace),
                     OptionBuilder.Bool(CounterOptionKeys.ShowDelta, "Show difference", true, "Show under your PB how far your current accuracy is above (+) or below (-) it."),
-                    OptionBuilder.Bool(CounterOptionKeys.AtThisPoint, "PB at this point", false, "Compare with your PB at the same point in the song. Needs a BeatLeader PB, or a PB set while this is on."),
+                    OptionBuilder.Bool(CounterOptionKeys.AtThisPoint, "PB over time", false, "Compare with your PB at the same point in the song. Needs a BeatLeader PB, or a PB set while this is on."),
                 },
             })
         {

@@ -54,6 +54,10 @@ namespace NotCounters.Core.Counters
 
         public const string AtThisPoint = "atThisPoint";
 
+        public const string HandLetters = "handLetters";
+
+        public const string SaberColors = "saberColors";
+
         public const string RecentCount = "recentCount";
 
         public const string LivesDisplay = "livesDisplay";

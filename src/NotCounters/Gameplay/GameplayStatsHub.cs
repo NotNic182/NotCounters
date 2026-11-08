@@ -198,6 +198,7 @@ namespace NotCounters.Gameplay
             snapshot.SongLength = ResolveSongLength();
             snapshot.SongTime = _audioTimeSyncController.songTime;
             Safe.Invoke(LogName + ".MapInfo", () => MapInfoFactory.Fill(snapshot.Map, _sceneSetupData, _spawnInitData?.noteJumpMovementSpeed));
+            Safe.Invoke(LogName + ".SaberColors", () => SaberColorReader.Fill(snapshot, _sceneSetupData));
 
             BeatmapNoteSummary summary = Safe.Invoke(
                 LogName + ".CollectNotes",

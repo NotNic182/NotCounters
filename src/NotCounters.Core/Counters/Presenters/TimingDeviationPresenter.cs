@@ -25,6 +25,8 @@ namespace NotCounters.Core.Counters.Presenters
                         OptionBuilder.Item(CounterChoices.TimingAbsolute, "Absolute")),
                     OptionBuilder.PerHand("Show the left and right saber separately."),
                     OptionBuilder.SeparateLines(),
+                    OptionBuilder.HandLetters(),
+                    OptionBuilder.SaberColors(),
                     OptionBuilder.ShowUnit("ms"),
                 },
             })
@@ -41,10 +43,13 @@ namespace NotCounters.Core.Counters.Presenters
 
             if (CounterOptions.GetBool(settings, CounterOptionKeys.PerHand))
             {
-                return new CounterRender(Hands(
-                    Entry(signed ? left.TimingDeviationSum : left.TimingDeviationAbsSum, left.TimingCount, signed, decimals, unit),
-                    Entry(signed ? right.TimingDeviationSum : right.TimingDeviationAbsSum, right.TimingCount, signed, decimals, unit),
-                    CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines)));
+                var look = HandLook.For(stats, settings);
+                return new CounterRender(
+                    look.Join(
+                        Entry(signed ? left.TimingDeviationSum : left.TimingDeviationAbsSum, left.TimingCount, signed, decimals, unit),
+                        Entry(signed ? right.TimingDeviationSum : right.TimingDeviationAbsSum, right.TimingCount, signed, decimals, unit),
+                        CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines)),
+                    richText: look.Colored);
             }
 
             var sum = signed

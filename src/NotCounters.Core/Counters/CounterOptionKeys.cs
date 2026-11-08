@@ -50,6 +50,8 @@ namespace NotCounters.Core.Counters
 
         public const string ShowBreakdown = "showBreakdown";
 
+        public const string ShowPercent = "showPercent";
+
         public const string RecentCount = "recentCount";
 
         public const string LivesDisplay = "livesDisplay";

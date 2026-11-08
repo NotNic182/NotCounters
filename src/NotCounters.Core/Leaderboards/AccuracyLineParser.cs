@@ -6,6 +6,9 @@ namespace NotCounters.Core.Leaderboards
 {
     public static class AccuracyLineParser
     {
+        // BeatLeader averages the notes cut within each second, and the game counts a cut a bit later, once its swing is scored
+        public const double BeatLeaderShift = 0.7;
+
         public static AccuracyLine? FromBeatLeaderStatistic(string? json)
         {
             if (!JsonRead.TryParse(json, out JToken? root, out _))
@@ -13,10 +16,10 @@ namespace NotCounters.Core.Leaderboards
                 return null;
             }
 
-            return FromArray(JsonRead.Prop(JsonRead.Prop(root, "scoreGraphTracker"), "graph"));
+            return FromArray(JsonRead.Prop(JsonRead.Prop(root, "scoreGraphTracker"), "graph"), BeatLeaderShift);
         }
 
-        public static AccuracyLine? FromArray(JToken? token)
+        public static AccuracyLine? FromArray(JToken? token, double shift = 0d)
         {
             if (!(token is JArray array))
             {
@@ -35,7 +38,7 @@ namespace NotCounters.Core.Leaderboards
                 values.Add(value.Value);
             }
 
-            return AccuracyLine.From(values);
+            return AccuracyLine.From(values, shift);
         }
     }
 }

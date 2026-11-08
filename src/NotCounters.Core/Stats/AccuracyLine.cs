@@ -10,18 +10,21 @@ namespace NotCounters.Core.Stats
 
         private readonly double[] _values;
 
-        private AccuracyLine(double[] values)
+        private AccuracyLine(double[] values, double shift)
         {
             _values = values;
+            Shift = shift;
         }
 
         public int Count => _values.Length;
+
+        public double Shift { get; }
 
         public double Final => _values[_values.Length - 1];
 
         public IReadOnlyList<double> Values => _values;
 
-        public static AccuracyLine? From(IEnumerable<double>? perSecond)
+        public static AccuracyLine? From(IEnumerable<double>? perSecond, double shift = 0d)
         {
             if (perSecond == null)
             {
@@ -39,7 +42,8 @@ namespace NotCounters.Core.Stats
                 values.Add(value < 0d ? 0d : value > 1d ? 1d : value);
             }
 
-            return values.Count >= 2 ? new AccuracyLine(values.ToArray()) : null;
+            bool shiftOk = !double.IsNaN(shift) && !double.IsInfinity(shift);
+            return values.Count >= 2 ? new AccuracyLine(values.ToArray(), shiftOk ? shift : 0d) : null;
         }
 
         public double? At(double songTime)
@@ -49,19 +53,20 @@ namespace NotCounters.Core.Stats
                 return null;
             }
 
-            if (songTime <= 0d)
+            double position = songTime - Shift;
+            if (position <= 0d)
             {
                 return _values[0];
             }
 
-            int index = (int)Math.Floor(songTime);
+            int index = (int)Math.Floor(position);
             if (index >= _values.Length - 1)
             {
                 return Final;
             }
 
             double from = _values[index];
-            return from + (_values[index + 1] - from) * (songTime - index);
+            return from + (_values[index + 1] - from) * (position - index);
         }
 
         public bool EndsAt(double accuracy) =>

@@ -52,6 +52,8 @@ namespace NotCounters.Core.Counters
 
         public const string ShowPercent = "showPercent";
 
+        public const string AtThisPoint = "atThisPoint";
+
         public const string RecentCount = "recentCount";
 
         public const string LivesDisplay = "livesDisplay";

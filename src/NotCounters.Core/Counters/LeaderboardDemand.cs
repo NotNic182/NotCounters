@@ -71,6 +71,22 @@ namespace NotCounters.Core.Counters
             return sources;
         }
 
+        public static bool WantsAccuracyLines(HudLayout? layout)
+        {
+            if (layout?.Counters == null) return false;
+            foreach (CounterSettings counter in layout.Counters)
+            {
+                if (counter != null && counter.Enabled
+                    && string.Equals(counter.Type, CounterTypeIds.PersonalBest, StringComparison.Ordinal)
+                    && CounterOptions.GetBool(counter, CounterOptionKeys.AtThisPoint))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static IReadOnlyList<PbSource> PersonalBestSources(CounterSettings counter) =>
             string.Equals(counter.Type, CounterTypeIds.PersonalBest, StringComparison.Ordinal)
                 ? CounterChoices.PbSourceCandidates(CounterOptions.GetChoice(counter, CounterOptionKeys.Source))

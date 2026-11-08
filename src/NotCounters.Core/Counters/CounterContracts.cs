@@ -158,7 +158,8 @@ namespace NotCounters.Core.Counters
             IReadOnlyList<CounterRow>? rows = null,
             string? detail = null,
             ColorValue? detailColor = null,
-            bool reservesDetail = false)
+            bool reservesDetail = false,
+            bool richText = false)
         {
             Value = value;
             LabelOverride = labelOverride;
@@ -168,6 +169,7 @@ namespace NotCounters.Core.Counters
             Detail = detail;
             DetailColor = detailColor;
             ReservesDetail = reservesDetail;
+            RichText = richText;
         }
 
         public string Value { get; }
@@ -185,6 +187,8 @@ namespace NotCounters.Core.Counters
         public ColorValue? DetailColor { get; }
 
         public bool ReservesDetail { get; }
+
+        public bool RichText { get; }
 
         public static CounterRender Text(string value) => new CounterRender(value);
 

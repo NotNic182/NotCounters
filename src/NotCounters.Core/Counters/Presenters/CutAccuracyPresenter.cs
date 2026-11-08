@@ -20,6 +20,8 @@ namespace NotCounters.Core.Counters.Presenters
                 {
                     OptionBuilder.PerHand("Show the left and right saber averages separately."),
                     OptionBuilder.SeparateLines(),
+                    OptionBuilder.HandLetters(),
+                    OptionBuilder.SaberColors(),
                     OptionBuilder.Bool(CounterOptionKeys.ShowBreakdown, "Show breakdown", false, "Append the average pre-swing (max 70), post-swing (max 30) and center (max 15) scores."),
                     OptionBuilder.Bool(CounterOptionKeys.ShowPercent, "Show as percent", false, "Show the average cut as a percent of 115, and the breakdown as a percent of 70, 30 and 15."),
                 },
@@ -36,11 +38,15 @@ namespace NotCounters.Core.Counters.Presenters
             var breakdown = CounterOptions.GetBool(settings, CounterOptionKeys.ShowBreakdown);
             var percent = CounterOptions.GetBool(settings, CounterOptionKeys.ShowPercent);
 
-            var text = CounterOptions.GetBool(settings, CounterOptionKeys.PerHand)
-                ? Hands(Entry(left, decimals, breakdown, percent), Entry(right, decimals, breakdown, percent), CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines))
-                : Entry(both, decimals, breakdown, percent);
+            var color = RankColor(Average(both.CutSum, both.CutCount) / MaxCutScore);
+            if (!CounterOptions.GetBool(settings, CounterOptionKeys.PerHand))
+            {
+                return new CounterRender(Entry(both, decimals, breakdown, percent), valueColor: color);
+            }
 
-            return new CounterRender(text, valueColor: RankColor(Average(both.CutSum, both.CutCount) / MaxCutScore));
+            var look = HandLook.For(stats, settings);
+            var text = look.Join(Entry(left, decimals, breakdown, percent), Entry(right, decimals, breakdown, percent), CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines));
+            return new CounterRender(text, valueColor: color, richText: look.Colored);
         }
 
         private static string Entry(CutSums sums, int decimals, bool breakdown, bool percent)

@@ -531,6 +531,7 @@ namespace NotCounters.Hud
             string? detail = null;
             var detailColor = Color.white;
             var reserveDetail = false;
+            var richText = false;
             IReadOnlyList<CounterRow>? rows;
             CounterTextLayoutKind layout;
             Color valueColor;
@@ -554,6 +555,7 @@ namespace NotCounters.Hud
                 detail = _composed.Detail;
                 detailColor = _composed.DetailColor.ToUnity();
                 reserveDetail = _composed.ReservesDetail;
+                richText = _composed.RichText;
                 rows = _composed.Rows;
                 layout = _composed.Layout;
                 valueColor = _composed.ValueColor.ToUnity();
@@ -577,6 +579,7 @@ namespace NotCounters.Hud
                 rows = null;
                 detail = null;
                 reserveDetail = false;
+                richText = false;
             }
 
             var alpha = contentShown && enabledInLayout ? 1f : _isEditSession ? HudMath.GhostAlpha : 0f;
@@ -598,17 +601,22 @@ namespace NotCounters.Hud
             }
             else
             {
-                WriteTexts(value, label, layout, valueColor, labelColor, detail, detailColor, reserveDetail);
+                WriteTexts(value, label, layout, valueColor, labelColor, detail, detailColor, reserveDetail, richText);
             }
 
             RefreshPoseForBlock();
         }
 
-        private void WriteTexts(string value, string? label, CounterTextLayoutKind layout, Color valueColor, Color labelColor, string? detail, Color detailColor, bool reserveDetail)
+        private void WriteTexts(string value, string? label, CounterTextLayoutKind layout, Color valueColor, Color labelColor, string? detail, Color detailColor, bool reserveDetail, bool richText)
         {
             var hasCaption = IsCaptionLayout(layout) && !string.IsNullOrEmpty(label);
             HideRows(0);
             _value.enabled = true;
+            if (_value.richText != richText)
+            {
+                _value.richText = richText;
+            }
+
             SetText(_value, value);
             SetColor(_value, valueColor);
             WriteCaption(hasCaption ? label : null, labelColor);
@@ -909,6 +917,7 @@ namespace NotCounters.Hud
             && string.Equals(a.Label, b.Label, StringComparison.Ordinal)
             && string.Equals(a.Detail, b.Detail, StringComparison.Ordinal)
             && a.ReservesDetail == b.ReservesDetail
+            && a.RichText == b.RichText
             && a.ValueColor == b.ValueColor
             && a.LabelColor == b.LabelColor
             && a.DetailColor == b.DetailColor

@@ -46,6 +46,12 @@ namespace NotCounters.Core.Counters.Presenters
         public static CounterOptionDescriptor SeparateLines() =>
             Bool(CounterOptionKeys.SeparateLines, "Hands on separate lines", false, "With \"Per hand\" on, show the left and right values on two lines instead of \"L x | R y\".");
 
+        public static CounterOptionDescriptor HandLetters() =>
+            Bool(CounterOptionKeys.HandLetters, "Show L and R", true, "With \"Per hand\" on, put L and R in front of the left and right values.");
+
+        public static CounterOptionDescriptor SaberColors() =>
+            Bool(CounterOptionKeys.SaberColors, "Saber colors", false, "With \"Per hand\" on, show the left and right values in your saber colors.");
+
         public static CounterOptionDescriptor ShowUnit(string unit) =>
             Bool(CounterOptionKeys.ShowUnit, "Show unit", true, "Append \"" + unit + "\" to the value.");
     }

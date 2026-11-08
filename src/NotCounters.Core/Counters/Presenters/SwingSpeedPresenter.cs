@@ -26,6 +26,8 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.Int(CounterOptionKeys.RecentCount, "Number of recent cuts", 10, 1, RecentCapacity, 1, "How many of your latest cuts per hand are averaged when \"Average over\" is Recent cuts."),
                     OptionBuilder.PerHand("Show the left and right saber separately."),
                     OptionBuilder.SeparateLines(),
+                    OptionBuilder.HandLetters(),
+                    OptionBuilder.SaberColors(),
                     OptionBuilder.ShowUnit("m/s"),
                 },
             })
@@ -58,10 +60,13 @@ namespace NotCounters.Core.Counters.Presenters
 
             if (CounterOptions.GetBool(settings, CounterOptionKeys.PerHand))
             {
-                return new CounterRender(Hands(
-                    Entry(leftSum, leftCount, decimals, unit),
-                    Entry(rightSum, rightCount, decimals, unit),
-                    CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines)));
+                var look = HandLook.For(stats, settings);
+                return new CounterRender(
+                    look.Join(
+                        Entry(leftSum, leftCount, decimals, unit),
+                        Entry(rightSum, rightCount, decimals, unit),
+                        CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines)),
+                    richText: look.Colored);
             }
 
             return new CounterRender(Entry(leftSum + rightSum, leftCount + rightCount, decimals, unit));

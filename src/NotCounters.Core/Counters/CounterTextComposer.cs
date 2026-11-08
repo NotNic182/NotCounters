@@ -50,6 +50,22 @@ namespace NotCounters.Core.Counters
             string? detail,
             ColorValue detailColor,
             bool reservesDetail)
+            : this(label, value, layout, valueColor, labelColor, hidden, rows, detail, detailColor, reservesDetail, false)
+        {
+        }
+
+        public ComposedCounterText(
+            string? label,
+            string value,
+            CounterTextLayoutKind layout,
+            ColorValue valueColor,
+            ColorValue labelColor,
+            bool hidden,
+            IReadOnlyList<CounterRow>? rows,
+            string? detail,
+            ColorValue detailColor,
+            bool reservesDetail,
+            bool richText)
         {
             Label = label;
             Value = value;
@@ -61,6 +77,7 @@ namespace NotCounters.Core.Counters
             Detail = Rows == null && !string.IsNullOrWhiteSpace(detail) ? detail : null;
             DetailColor = detailColor;
             ReservesDetail = Rows == null && reservesDetail;
+            RichText = Rows == null && richText;
         }
 
         public string? Label { get; }
@@ -82,6 +99,8 @@ namespace NotCounters.Core.Counters
         public ColorValue DetailColor { get; }
 
         public bool ReservesDetail { get; }
+
+        public bool RichText { get; }
     }
 
     public static class CounterTextComposer
@@ -95,9 +114,10 @@ namespace NotCounters.Core.Counters
             var valueColor = style.ColorByValue && render.ValueColor.HasValue ? render.ValueColor.Value : style.ValueColor;
             var detail = render.Detail;
             var detailColor = style.ColorByValue && render.DetailColor.HasValue ? render.DetailColor.Value : style.ValueColor;
+            var richText = render.RichText;
             if (!style.ShowLabel)
             {
-                return new ComposedCounterText(null, value, CounterTextLayoutKind.ValueOnly, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail);
+                return new ComposedCounterText(null, value, CounterTextLayoutKind.ValueOnly, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail, richText);
             }
 
             var rows = render.Rows;
@@ -111,7 +131,7 @@ namespace NotCounters.Core.Counters
             var label = NonBlank(style.LabelText) ?? NonBlank(render.LabelOverride) ?? NonBlank(descriptor?.DefaultLabel);
             if (label == null)
             {
-                return new ComposedCounterText(null, value, CounterTextLayoutKind.ValueOnly, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail);
+                return new ComposedCounterText(null, value, CounterTextLayoutKind.ValueOnly, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail, richText);
             }
 
             CounterTextLayoutKind layout;
@@ -127,13 +147,14 @@ namespace NotCounters.Core.Counters
                     layout = CounterTextLayoutKind.LabelRight;
                     break;
                 case LabelPlacement.Inline:
-                    return new ComposedCounterText(null, label + ": " + value, CounterTextLayoutKind.Inline, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail);
+                    var prefix = richText && label.IndexOf('<') >= 0 ? "<noparse>" + label + "</noparse>: " : label + ": ";
+                    return new ComposedCounterText(null, prefix + value, CounterTextLayoutKind.Inline, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail, richText);
                 default:
                     layout = CounterTextLayoutKind.LabelAbove;
                     break;
             }
 
-            return new ComposedCounterText(label, value, layout, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail);
+            return new ComposedCounterText(label, value, layout, valueColor, style.LabelColor, render.Hidden, null, detail, detailColor, render.ReservesDetail, richText);
         }
 
         private static CounterTextLayoutKind TitleLayout(LabelPlacement placement)

@@ -38,6 +38,7 @@ namespace NotCounters.Core.Preview
         private const double CenterShareOfLoss = 0.8;
         private const double PostShareOfRemainingLoss = 0.6;
         private const double PersonalBestComboShare = 0.62;
+        private const double PreviewLineLead = 0.012;
 
         private const int ScriptedMissIndex = 57;
         private const int ScriptedBadCutIndex = 131;
@@ -155,6 +156,18 @@ namespace NotCounters.Core.Preview
             target.MaxCombo = (int)(scoredObjects * PersonalBestComboShare);
             target.FullCombo = false;
             target.StatusText = null;
+            target.Line = PreviewLine(accuracy);
+        }
+
+        private static AccuracyLine? PreviewLine(double finalAccuracy)
+        {
+            var values = new double[(int)MapLengthSeconds + 1];
+            for (int second = 0; second < values.Length; second++)
+            {
+                values[second] = finalAccuracy + PreviewLineLead * (1d - second / (double)MapLengthSeconds);
+            }
+
+            return AccuracyLine.From(values);
         }
 
         private static void SetAvailable(PersonalBestInfo? target, bool available)

@@ -198,6 +198,10 @@ namespace NotCounters.Core.Stats
         public bool FullCombo { get; set; }
 
         public string? StatusText { get; set; }
+
+        public long? ScoreId { get; set; }
+
+        public AccuracyLine? Line { get; set; }
     }
 
     public enum PpStatus

@@ -32,6 +32,7 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.Bool(CounterOptionKeys.ShowScore, "Show PB score", false, "Show the score of your personal best."),
                     OptionBuilder.Grouping(CounterChoices.GroupingSpace),
                     OptionBuilder.Bool(CounterOptionKeys.ShowDelta, "Show difference", true, "Show under your PB how far your current accuracy is above (+) or below (-) it."),
+                    OptionBuilder.Bool(CounterOptionKeys.AtThisPoint, "PB at this point", false, "Compare with your PB at the same point in the song. Needs a BeatLeader PB, or a PB set while this is on."),
                 },
             })
         {
@@ -67,7 +68,14 @@ namespace NotCounters.Core.Counters.Presenters
                 showAccuracy = true;
             }
 
+            var current = source == PbSource.Local ? stats.ModifiedRelativeScore : stats.Accuracy;
+            var playing = current.HasValue && NumberFormatting.IsFinite(current.Value);
             double? pbRaw = NumberFormatting.IsFinite(pb.Accuracy) ? pb.Accuracy : (double?)null;
+            if (playing && pb.Line != null && CounterOptions.GetBool(settings, CounterOptionKeys.AtThisPoint))
+            {
+                pbRaw = pb.Line.At(stats.SongTime) ?? pbRaw;
+            }
+
             double? pbAccuracy = pbRaw.HasValue ? Clamp01(pbRaw.Value) : (double?)null;
             var text = showAccuracy ? PercentOrNoData(pbAccuracy, decimals) : string.Empty;
             if (showScore)
@@ -78,11 +86,9 @@ namespace NotCounters.Core.Counters.Presenters
             }
 
             var color = RankColor(pbAccuracy);
-            var current = source == PbSource.Local ? stats.ModifiedRelativeScore : stats.Accuracy;
-            if (showDelta
-                && current.HasValue && NumberFormatting.IsFinite(current.Value) && pbRaw.HasValue)
+            if (showDelta && playing && pbRaw.HasValue)
             {
-                var points = (current.Value - pbRaw.Value) * 100d;
+                var points = (current.GetValueOrDefault() - pbRaw.Value) * 100d;
                 var delta = NumberFormatting.SignedPercentPoints(points, decimals);
                 var deltaColor = CounterColors.ForDelta(NumberFormatting.RoundForDisplay(points, decimals));
                 return new CounterRender(text, labelOverride, color, detail: delta, detailColor: deltaColor, reservesDetail: true);

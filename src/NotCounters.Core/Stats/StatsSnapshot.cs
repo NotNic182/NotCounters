@@ -1,3 +1,4 @@
+using NotCounters.Core.Config;
 using NotCounters.Core.Leaderboards;
 
 namespace NotCounters.Core.Stats
@@ -174,6 +175,8 @@ namespace NotCounters.Core.Stats
         public int SaberSpeedCount { get; set; }
 
         public System.Collections.Generic.List<float> RecentSaberSpeeds { get; } = new System.Collections.Generic.List<float>();
+
+        public ColorValue? SaberColor { get; set; }
     }
 
     public enum PbSource
@@ -198,6 +201,10 @@ namespace NotCounters.Core.Stats
         public bool FullCombo { get; set; }
 
         public string? StatusText { get; set; }
+
+        public long? ScoreId { get; set; }
+
+        public AccuracyLine? Line { get; set; }
     }
 
     public enum PpStatus

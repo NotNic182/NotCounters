@@ -24,6 +24,10 @@ namespace NotCounters.Core.Counters.Presenters
                         OptionBuilder.Item(CounterChoices.SwingBoth, "Both")),
                     OptionBuilder.PerHand("Show the left and right saber separately."),
                     OptionBuilder.SeparateLines(),
+                    OptionBuilder.HandLetters(),
+                    OptionBuilder.HandColors(),
+                    OptionBuilder.LeftColor(),
+                    OptionBuilder.RightColor(),
                 },
             })
         {
@@ -38,9 +42,12 @@ namespace NotCounters.Core.Counters.Presenters
             var labelOverride = display == CounterChoices.SwingUnderswings ? "Underswings (Pre/Post)" : null;
 
             string text;
+            var richText = false;
             if (CounterOptions.GetBool(settings, CounterOptionKeys.PerHand))
             {
-                text = Hands(
+                var look = HandLook.For(stats, settings);
+                richText = look.Colored;
+                text = look.Join(
                     Pair(left.FullPreSwings, left.PreSwingCount, left.FullPostSwings, left.PostSwingCount, display, decimals),
                     Pair(right.FullPreSwings, right.PreSwingCount, right.FullPostSwings, right.PostSwingCount, display, decimals),
                     CounterOptions.GetBool(settings, CounterOptionKeys.SeparateLines));
@@ -56,7 +63,7 @@ namespace NotCounters.Core.Counters.Presenters
                     decimals);
             }
 
-            return new CounterRender(text, labelOverride);
+            return new CounterRender(text, labelOverride, richText: richText);
         }
 
         private static string Pair(int fullPre, int preCount, int fullPost, int postCount, string display, int decimals) =>

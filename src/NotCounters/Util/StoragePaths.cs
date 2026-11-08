@@ -13,6 +13,8 @@ namespace NotCounters.Util
 
         public static string LeaderboardCacheFile => Path.Combine(DataDirectory, "leaderboard-cache.json");
 
+        public static string AccuracyLinesDirectory => Path.Combine(DataDirectory, "pb-lines");
+
         public static bool MigrateLegacyFolder()
         {
             try

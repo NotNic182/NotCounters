@@ -24,6 +24,10 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.Bool(CounterOptionKeys.IncludeBombs, "Count bomb hits", false, "Added to the count, or shown as \"Bombs\" with Separate lines or with \"Per hand\" on."),
                     OptionBuilder.PerHand("Split the count into left and right saber."),
                     OptionBuilder.SeparateLines(),
+                    OptionBuilder.HandLetters(),
+                    OptionBuilder.HandColors(),
+                    OptionBuilder.LeftColor(),
+                    OptionBuilder.RightColor(),
                 },
             })
         {
@@ -37,7 +41,8 @@ namespace NotCounters.Core.Counters.Presenters
 
             if (CounterOptions.GetBool(settings, CounterOptionKeys.PerHand))
             {
-                return new CounterRender(RenderPerHand(stats, settings, mode, includeBombs));
+                var look = HandLook.For(stats, settings);
+                return new CounterRender(RenderPerHand(stats, settings, mode, includeBombs, look), richText: look.Colored);
             }
 
             var chainLinks = CounterOptions.GetBool(settings, CounterOptionKeys.IncludeChainLinks);
@@ -58,7 +63,7 @@ namespace NotCounters.Core.Counters.Presenters
             }
         }
 
-        private static string RenderPerHand(StatsSnapshot stats, CounterSettings settings, string mode, bool includeBombs)
+        private static string RenderPerHand(StatsSnapshot stats, CounterSettings settings, string mode, bool includeBombs, HandLook look)
         {
             var left = stats.Left;
             var right = stats.Right;
@@ -68,15 +73,15 @@ namespace NotCounters.Core.Counters.Presenters
             switch (mode)
             {
                 case CounterChoices.MissMisses:
-                    return Hands(Count(left.Misses), Count(right.Misses), separateLines) + bombsSuffix;
+                    return look.Join(Count(left.Misses), Count(right.Misses), separateLines) + bombsSuffix;
                 case CounterChoices.MissBadCuts:
-                    return Hands(Count(left.BadCuts), Count(right.BadCuts), separateLines) + bombsSuffix;
+                    return look.Join(Count(left.BadCuts), Count(right.BadCuts), separateLines) + bombsSuffix;
                 case CounterChoices.MissSeparate:
-                    var lines = "Missed " + Hands(Count(left.Misses), Count(right.Misses), false)
-                        + "\nBad cuts " + Hands(Count(left.BadCuts), Count(right.BadCuts), false);
+                    var lines = "Missed " + look.Join(Count(left.Misses), Count(right.Misses), false)
+                        + "\nBad cuts " + look.Join(Count(left.BadCuts), Count(right.BadCuts), false);
                     return includeBombs ? lines + "\nBombs " + Count(stats.BombsHit) : lines;
                 default:
-                    return Hands(Count(left.Misses + left.BadCuts), Count(right.Misses + right.BadCuts), separateLines) + bombsSuffix;
+                    return look.Join(Count(left.Misses + left.BadCuts), Count(right.Misses + right.BadCuts), separateLines) + bombsSuffix;
             }
         }
     }

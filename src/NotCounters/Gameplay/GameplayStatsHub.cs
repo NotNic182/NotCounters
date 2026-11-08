@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NotCounters.Contracts;
 using NotCounters.Core.Config;
 using NotCounters.Core.Counters;
@@ -39,6 +40,7 @@ namespace NotCounters.Gameplay
         private readonly ILeaderboardDataService? _leaderboardDataService;
         private readonly IRemotePersonalBestService? _remotePersonalBestService;
         private readonly IPlayerAccountService? _playerAccounts;
+        private readonly IPersonalBestLineService? _lineService;
 
         private readonly Dictionary<NoteData, Hand> _badCutSabers = new Dictionary<NoteData, Hand>();
 
@@ -54,6 +56,10 @@ namespace NotCounters.Gameplay
 
         private LevelIdentity? _remotePersonalBestLevel;
         private bool _accountsSubscribed;
+
+        private AccuracyLineRecorder? _lineRecorder;
+        private SavedAccuracyLine? _savedLine;
+        private IDisposable? _beatLeaderLineRequest;
 
         private bool _initialized;
         private bool _subscribed;
@@ -92,7 +98,8 @@ namespace NotCounters.Gameplay
             [InjectOptional] IConfigService? configService,
             [InjectOptional] ILeaderboardDataService? leaderboardDataService,
             [InjectOptional] IRemotePersonalBestService? remotePersonalBestService,
-            [InjectOptional] IPlayerAccountService? playerAccounts)
+            [InjectOptional] IPlayerAccountService? playerAccounts,
+            [InjectOptional] IPersonalBestLineService? lineService)
             : base(LogName)
         {
             _log = log;
@@ -115,6 +122,7 @@ namespace NotCounters.Gameplay
             _leaderboardDataService = leaderboardDataService;
             _remotePersonalBestService = remotePersonalBestService;
             _playerAccounts = playerAccounts;
+            _lineService = lineService;
         }
 
         public void Initialize()
@@ -190,6 +198,7 @@ namespace NotCounters.Gameplay
             snapshot.SongLength = ResolveSongLength();
             snapshot.SongTime = _audioTimeSyncController.songTime;
             Safe.Invoke(LogName + ".MapInfo", () => MapInfoFactory.Fill(snapshot.Map, _sceneSetupData, _spawnInitData?.noteJumpMovementSpeed));
+            Safe.Invoke(LogName + ".SaberColors", () => SaberColorReader.Fill(snapshot, _sceneSetupData));
 
             BeatmapNoteSummary summary = Safe.Invoke(
                 LogName + ".CollectNotes",
@@ -213,6 +222,7 @@ namespace NotCounters.Gameplay
                 LogName + ".Layout",
                 () => _configService?.GetEffectiveLayout(EnvironmentName()),
                 null);
+            Safe.Invoke(LogName + ".AccuracyLines", () => StartAccuracyLines(key, mode, layout, summary.FullMapMaxMultipliedScore));
             Safe.Invoke(LogName + ".Leaderboards", () => RequestLeaderboards(level, modifiers, speedHasLeaderboardCode, mode, layout));
             Safe.Invoke(LogName + ".RemotePersonalBest", () => RequestRemotePersonalBest(level, mode, layout));
 
@@ -220,6 +230,48 @@ namespace NotCounters.Gameplay
                        $"{summary.TotalNotes} notes, {summary.TotalChainLinks} chain links, {summary.TotalBombs} bombs, " +
                        $"max {summary.FullMapMaxMultipliedScore}; speed={effectiveSpeed} practice={mode.IsPractice} " +
                        $"party={mode.IsParty} campaign={mode.IsCampaign} leaderboard={level?.ToString() ?? "none"}");
+        }
+
+        private void StartAccuracyLines(BeatmapKey key, PlayMode mode, HudLayout? layout, int maxScore)
+        {
+            if (_lineService == null || mode.IsPractice || mode.IsPartyOrCampaign || !LeaderboardDemand.WantsAccuracyLines(layout)) return;
+
+            BeatmapCharacteristicSO? characteristic = key.beatmapCharacteristic;
+            string mapKey = key.levelId + "_" + (characteristic != null ? characteristic.serializedName : "Unknown") + "_" + key.difficulty;
+            _savedLine = _lineService.LoadSaved(mapKey);
+            _lineRecorder = new AccuracyLineRecorder { MaxScore = maxScore };
+            _lineService.StartRecording(mapKey, _lineRecorder);
+            AttachSavedLine(Current.PersonalBest);
+            string saved = _savedLine != null ? _savedLine.Line.Final.ToString("0.0000", CultureInfo.InvariantCulture) : "none";
+            _log.Debug($"{LogName}: recording the accuracy line for {mapKey}; saved line ends at {saved}.");
+        }
+
+        private void AttachLines(PbSource source, PersonalBestInfo personalBest)
+        {
+            AttachSavedLine(personalBest);
+            if (source != PbSource.BeatLeader || !personalBest.ScoreId.HasValue || _lineService == null) return;
+
+            long scoreId = personalBest.ScoreId.Value;
+            IDisposable? previous = _beatLeaderLineRequest;
+            _beatLeaderLineRequest = null;
+            if (previous != null) Safe.Invoke(LogName + ".DetachPbLine", previous.Dispose);
+            _beatLeaderLineRequest = _lineService.RequestBeatLeader(scoreId, line => HandleBeatLeaderLine(scoreId, line));
+        }
+
+        private void AttachSavedLine(PersonalBestInfo? personalBest)
+        {
+            if (personalBest == null || personalBest.Line != null || _savedLine == null || !_savedLine.Matches(personalBest)) return;
+            personalBest.Line = _savedLine.Line;
+            _dirty = true;
+        }
+
+        private void HandleBeatLeaderLine(long scoreId, AccuracyLine? line)
+        {
+            if (_disposed || line == null) return;
+            PersonalBestInfo personalBest = Current.BeatLeaderPersonalBest;
+            if (!personalBest.Available || personalBest.ScoreId != scoreId) return;
+            personalBest.Line = line;
+            _dirty = true;
         }
 
         private float ResolveSongLength()
@@ -378,6 +430,10 @@ namespace NotCounters.Gameplay
             }
 
             _remotePersonalBests.Clear();
+
+            IDisposable? line = _beatLeaderLineRequest;
+            _beatLeaderLineRequest = null;
+            if (line != null) Safe.Invoke(LogName + ".DetachPbLine", line.Dispose);
         }
 
         private void Subscribe()
@@ -583,6 +639,7 @@ namespace NotCounters.Gameplay
             try
             {
                 _energyReachedZero = true;
+                if (_lineRecorder != null) _lineRecorder.Spoiled = true;
                 PushEnergy(_audioTimeSyncController.songTime);
             }
             catch (Exception ex)
@@ -628,6 +685,7 @@ namespace NotCounters.Gameplay
                 {
                     PersonalBestReader.CopyInto(personalBest, remote);
                     personalBest.Source = source;
+                    if (_lineRecorder != null) AttachLines(source, personalBest);
                 }
                 else
                 {
@@ -683,6 +741,7 @@ namespace NotCounters.Gameplay
         private void PublishSnapshot(float songTime)
         {
             _scoreTracker!.UpdateDerived();
+            _lineRecorder?.Sample(songTime, Current.Accuracy, Current.MultipliedScore);
             if (_dirty)
             {
                 _ppTracker!.Update();

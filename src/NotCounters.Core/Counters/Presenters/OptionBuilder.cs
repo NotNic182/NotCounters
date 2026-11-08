@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using NotCounters.Core.Config;
 
 namespace NotCounters.Core.Counters.Presenters
 {
@@ -27,6 +28,9 @@ namespace NotCounters.Core.Counters.Presenters
                 Choices = choices,
             };
 
+        public static CounterOptionDescriptor Color(string key, string displayName, ColorValue defaultValue, string help) =>
+            new CounterOptionDescriptor(key, displayName, CounterOptionKind.Color, new JValue(defaultValue.ToHex())) { HelpText = help };
+
         public static KeyValuePair<string, string> Item(string key, string label) => new KeyValuePair<string, string>(key, label);
 
         public static CounterOptionDescriptor Grouping(string defaultValue) =>
@@ -49,8 +53,21 @@ namespace NotCounters.Core.Counters.Presenters
         public static CounterOptionDescriptor HandLetters() =>
             Bool(CounterOptionKeys.HandLetters, "Show L and R", true, "With \"Per hand\" on, put L and R in front of the left and right values.");
 
-        public static CounterOptionDescriptor SaberColors() =>
-            Bool(CounterOptionKeys.SaberColors, "Saber colors", false, "With \"Per hand\" on, show the left and right values in your saber colors.");
+        public static CounterOptionDescriptor HandColors() =>
+            Choice(
+                CounterOptionKeys.HandColors,
+                "Hand colors",
+                CounterChoices.HandColorsOff,
+                "Color the left and right values. Sabers: like your sabers in that map. Custom: the two colors below.",
+                Item(CounterChoices.HandColorsOff, "Off"),
+                Item(CounterChoices.HandColorsSabers, "Sabers"),
+                Item(CounterChoices.HandColorsCustom, "Custom"));
+
+        public static CounterOptionDescriptor LeftColor() =>
+            Color(CounterOptionKeys.LeftColor, "Left color", CounterColors.DefaultLeftSaber, "Color of the left values when \"Hand colors\" is Custom.");
+
+        public static CounterOptionDescriptor RightColor() =>
+            Color(CounterOptionKeys.RightColor, "Right color", CounterColors.DefaultRightSaber, "Color of the right values when \"Hand colors\" is Custom.");
 
         public static CounterOptionDescriptor ShowUnit(string unit) =>
             Bool(CounterOptionKeys.ShowUnit, "Show unit", true, "Append \"" + unit + "\" to the value.");

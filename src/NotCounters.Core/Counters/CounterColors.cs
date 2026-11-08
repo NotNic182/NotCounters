@@ -24,6 +24,10 @@ namespace NotCounters.Core.Counters
 
         public static readonly ColorValue Danger = RankD;
 
+        public static readonly ColorValue DefaultLeftSaber = FromRgb(0xC8, 0x14, 0x14);
+
+        public static readonly ColorValue DefaultRightSaber = FromRgb(0x28, 0x8E, 0xD2);
+
         public static ColorValue ForAccuracy(double fraction)
         {
             if (double.IsNaN(fraction))

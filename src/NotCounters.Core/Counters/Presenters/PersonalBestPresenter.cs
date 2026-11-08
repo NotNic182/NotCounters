@@ -33,6 +33,8 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.Grouping(CounterChoices.GroupingSpace),
                     OptionBuilder.Bool(CounterOptionKeys.ShowDelta, "Show difference", true, "Show under your PB how far your current accuracy is above (+) or below (-) it."),
                     OptionBuilder.Bool(CounterOptionKeys.AtThisPoint, "PB over time", false, "Compare with your PB at the same point in the song. Needs a BeatLeader PB, or a PB set while this is on."),
+                    OptionBuilder.Color(CounterOptionKeys.AheadColor, "Ahead color", CounterColors.Positive, "With \"Color by value\" on, the difference shows in this color while you're ahead of your PB."),
+                    OptionBuilder.Color(CounterOptionKeys.BehindColor, "Behind color", CounterColors.Negative, "With \"Color by value\" on, the difference shows in this color while you're behind your PB."),
                 },
             })
         {
@@ -82,7 +84,7 @@ namespace NotCounters.Core.Counters.Presenters
             if (differenceOnly)
             {
                 return points.HasValue
-                    ? new CounterRender(NumberFormatting.SignedPercentPoints(points.Value, decimals), labelOverride, DeltaColor(points.Value, decimals))
+                    ? new CounterRender(NumberFormatting.SignedPercentPoints(points.Value, decimals), labelOverride, DeltaColor(settings, points.Value, decimals))
                     : new CounterRender(NoData, labelOverride);
             }
 
@@ -99,14 +101,22 @@ namespace NotCounters.Core.Counters.Presenters
             if (showDelta && points.HasValue)
             {
                 var delta = NumberFormatting.SignedPercentPoints(points.Value, decimals);
-                return new CounterRender(text, labelOverride, color, detail: delta, detailColor: DeltaColor(points.Value, decimals), reservesDetail: true);
+                return new CounterRender(text, labelOverride, color, detail: delta, detailColor: DeltaColor(settings, points.Value, decimals), reservesDetail: true);
             }
 
             return new CounterRender(text, labelOverride, color, reservesDetail: showDelta);
         }
 
-        private static ColorValue DeltaColor(double points, int decimals) =>
-            CounterColors.ForDelta(NumberFormatting.RoundForDisplay(points, decimals));
+        private static ColorValue DeltaColor(CounterSettings settings, double points, int decimals)
+        {
+            var shown = NumberFormatting.RoundForDisplay(points, decimals);
+            if (shown > 0d)
+            {
+                return CounterOptions.GetColor(settings, CounterOptionKeys.AheadColor);
+            }
+
+            return shown < 0d ? CounterOptions.GetColor(settings, CounterOptionKeys.BehindColor) : CounterColors.Neutral;
+        }
 
         private static PersonalBestInfo? Resolve(StatsSnapshot stats, IReadOnlyList<PbSource> candidates, out PbSource source)
         {

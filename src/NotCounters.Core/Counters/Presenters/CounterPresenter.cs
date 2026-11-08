@@ -31,9 +31,6 @@ namespace NotCounters.Core.Counters.Presenters
         protected int Decimals(CounterSettings settings) =>
             NumberFormatting.ClampDecimals(settings.Style?.Decimals ?? Descriptor.DefaultDecimals);
 
-        protected static string Hands(string left, string right, bool separateLines) =>
-            "L " + left + (separateLines ? "\n" : " | ") + "R " + right;
-
         protected static string Count(int value) => value.ToString(CultureInfo.InvariantCulture);
 
         protected static double? Average(double sum, int count) => count > 0 ? sum / count : (double?)null;

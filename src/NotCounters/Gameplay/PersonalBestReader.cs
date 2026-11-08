@@ -57,6 +57,8 @@ namespace NotCounters.Gameplay
             target.MaxCombo = source.MaxCombo;
             target.FullCombo = source.FullCombo;
             target.StatusText = source.StatusText;
+            target.ScoreId = source.ScoreId;
+            target.Line = source.Line;
         }
 
         public static void SetUnavailable(PersonalBestInfo target, string statusText, PbSource source = PbSource.Local)
@@ -68,6 +70,8 @@ namespace NotCounters.Gameplay
             target.MaxCombo = 0;
             target.FullCombo = false;
             target.StatusText = statusText;
+            target.ScoreId = null;
+            target.Line = null;
         }
     }
 }

@@ -281,6 +281,7 @@ namespace NotCounters.Services
                 MaxCombo = info.MaxCombo,
                 FullCombo = info.FullCombo,
                 StatusText = info.StatusText,
+                ScoreId = info.ScoreId,
             };
             Safe.Invoke("RemotePb.Callback", () => listener(copy));
         }

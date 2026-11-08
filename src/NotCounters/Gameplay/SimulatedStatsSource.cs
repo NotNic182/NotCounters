@@ -103,6 +103,7 @@ namespace NotCounters.Gameplay
             if (_sceneSetupData != null)
             {
                 MapInfoFactory.Fill(snapshot.Map, _sceneSetupData, _spawnInitData?.noteJumpMovementSpeed);
+                SaberColorReader.Fill(snapshot, _sceneSetupData);
             }
             else
             {

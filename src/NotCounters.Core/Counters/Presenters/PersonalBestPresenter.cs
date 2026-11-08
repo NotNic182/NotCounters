@@ -28,10 +28,13 @@ namespace NotCounters.Core.Counters.Presenters
                         OptionBuilder.Item(CounterChoices.PbSourceLocal, "Local (this game)"),
                         OptionBuilder.Item(CounterChoices.PbSourceBeatLeader, "BeatLeader"),
                         OptionBuilder.Item(CounterChoices.PbSourceScoreSaber, "ScoreSaber")),
-                    OptionBuilder.Bool(CounterOptionKeys.ShowAccuracy, "Show PB accuracy", true, "Show the accuracy of your personal best. With \"Show PB score\" also off, it is shown anyway."),
+                    OptionBuilder.Bool(CounterOptionKeys.ShowAccuracy, "Show PB accuracy", true, "Show your PB's accuracy. With PB over time on, turn this and \"Show PB score\" off to see only the difference."),
                     OptionBuilder.Bool(CounterOptionKeys.ShowScore, "Show PB score", false, "Show the score of your personal best."),
                     OptionBuilder.Grouping(CounterChoices.GroupingSpace),
                     OptionBuilder.Bool(CounterOptionKeys.ShowDelta, "Show difference", true, "Show under your PB how far your current accuracy is above (+) or below (-) it."),
+                    OptionBuilder.Bool(CounterOptionKeys.AtThisPoint, "PB over time", false, "Compare with your PB at the same point in the song. Needs a BeatLeader PB, or a PB set while this is on."),
+                    OptionBuilder.Color(CounterOptionKeys.AheadColor, "Ahead color", CounterColors.Positive, "With \"Color by value\" on, the difference shows in this color while you're ahead of your PB."),
+                    OptionBuilder.Color(CounterOptionKeys.BehindColor, "Behind color", CounterColors.Negative, "With \"Color by value\" on, the difference shows in this color while you're behind your PB."),
                 },
             })
         {
@@ -62,12 +65,29 @@ namespace NotCounters.Core.Counters.Presenters
             var decimals = Decimals(settings);
             var showAccuracy = CounterOptions.GetBool(settings, CounterOptionKeys.ShowAccuracy);
             var showScore = CounterOptions.GetBool(settings, CounterOptionKeys.ShowScore);
+            var overTime = CounterOptions.GetBool(settings, CounterOptionKeys.AtThisPoint);
+            var differenceOnly = overTime && showDelta && !showAccuracy && !showScore;
             if (!showAccuracy && !showScore)
             {
                 showAccuracy = true;
             }
 
+            var current = source == PbSource.Local ? stats.ModifiedRelativeScore : stats.Accuracy;
+            var playing = current.HasValue && NumberFormatting.IsFinite(current.Value);
             double? pbRaw = NumberFormatting.IsFinite(pb.Accuracy) ? pb.Accuracy : (double?)null;
+            if (playing && pb.Line != null && overTime)
+            {
+                pbRaw = pb.Line.At(stats.SongTime) ?? pbRaw;
+            }
+
+            double? points = playing && pbRaw.HasValue ? (current.GetValueOrDefault() - pbRaw.Value) * 100d : (double?)null;
+            if (differenceOnly)
+            {
+                return points.HasValue
+                    ? new CounterRender(NumberFormatting.SignedPercentPoints(points.Value, decimals), labelOverride, DeltaColor(settings, points.Value, decimals))
+                    : new CounterRender(NoData, labelOverride);
+            }
+
             double? pbAccuracy = pbRaw.HasValue ? Clamp01(pbRaw.Value) : (double?)null;
             var text = showAccuracy ? PercentOrNoData(pbAccuracy, decimals) : string.Empty;
             if (showScore)
@@ -78,17 +98,24 @@ namespace NotCounters.Core.Counters.Presenters
             }
 
             var color = RankColor(pbAccuracy);
-            var current = source == PbSource.Local ? stats.ModifiedRelativeScore : stats.Accuracy;
-            if (showDelta
-                && current.HasValue && NumberFormatting.IsFinite(current.Value) && pbRaw.HasValue)
+            if (showDelta && points.HasValue)
             {
-                var points = (current.Value - pbRaw.Value) * 100d;
-                var delta = NumberFormatting.SignedPercentPoints(points, decimals);
-                var deltaColor = CounterColors.ForDelta(NumberFormatting.RoundForDisplay(points, decimals));
-                return new CounterRender(text, labelOverride, color, detail: delta, detailColor: deltaColor, reservesDetail: true);
+                var delta = NumberFormatting.SignedPercentPoints(points.Value, decimals);
+                return new CounterRender(text, labelOverride, color, detail: delta, detailColor: DeltaColor(settings, points.Value, decimals), reservesDetail: true);
             }
 
             return new CounterRender(text, labelOverride, color, reservesDetail: showDelta);
+        }
+
+        private static ColorValue DeltaColor(CounterSettings settings, double points, int decimals)
+        {
+            var shown = NumberFormatting.RoundForDisplay(points, decimals);
+            if (shown > 0d)
+            {
+                return CounterOptions.GetColor(settings, CounterOptionKeys.AheadColor);
+            }
+
+            return shown < 0d ? CounterOptions.GetColor(settings, CounterOptionKeys.BehindColor) : CounterColors.Neutral;
         }
 
         private static PersonalBestInfo? Resolve(StatsSnapshot stats, IReadOnlyList<PbSource> candidates, out PbSource source)

@@ -50,6 +50,22 @@ namespace NotCounters.Core.Counters
 
         public const string ShowBreakdown = "showBreakdown";
 
+        public const string ShowPercent = "showPercent";
+
+        public const string AtThisPoint = "atThisPoint";
+
+        public const string HandLetters = "handLetters";
+
+        public const string HandColors = "handColors";
+
+        public const string LeftColor = "leftColor";
+
+        public const string RightColor = "rightColor";
+
+        public const string AheadColor = "aheadColor";
+
+        public const string BehindColor = "behindColor";
+
         public const string RecentCount = "recentCount";
 
         public const string LivesDisplay = "livesDisplay";

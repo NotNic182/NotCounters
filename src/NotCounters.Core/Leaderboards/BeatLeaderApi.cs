@@ -34,6 +34,12 @@ namespace NotCounters.Core.Leaderboards
                 ApiUrl.Segment(level.BeatLeaderDifficultySegment), "/", ApiUrl.Segment(level.BeatLeaderModeSegment));
         }
 
+        public string? ScoreStatisticUrl(long scoreId)
+        {
+            if (scoreId <= 0) return null;
+            return ApiUrl.Join(BaseUrl, "/score/statistic/", scoreId.ToString(CultureInfo.InvariantCulture));
+        }
+
         public string? PlayerUrl(string? idOrAlias)
         {
             if (string.IsNullOrWhiteSpace(idOrAlias)) return null;

@@ -86,6 +86,12 @@ namespace NotCounters.Core.Counters
 
         public const string PpScoreSaber = "scoreSaber";
 
+        public const string HandColorsOff = "off";
+
+        public const string HandColorsSabers = "sabers";
+
+        public const string HandColorsCustom = "custom";
+
         public static PbSource ToPbSource(string? choice)
         {
             if (string.Equals(choice, PbSourceBeatLeader, StringComparison.Ordinal))

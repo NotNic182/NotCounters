@@ -147,6 +147,15 @@ namespace NotCounters.Contracts
         IDisposable Request(LevelIdentity level, PbSource source, Action<PersonalBestInfo> onResult);
     }
 
+    public interface IPersonalBestLineService
+    {
+        IDisposable RequestBeatLeader(long scoreId, Action<AccuracyLine?> onResult);
+
+        SavedAccuracyLine? LoadSaved(string mapKey);
+
+        void StartRecording(string mapKey, AccuracyLineRecorder recorder);
+    }
+
     public interface IEditSessionState
     {
         bool IsActive { get; }

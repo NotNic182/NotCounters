@@ -70,6 +70,7 @@ namespace NotCounters.Core.Leaderboards
                     Accuracy = Clamp01(accuracy.Value),
                     MaxCombo = Math.Max(0, JsonRead.Int(JsonRead.Prop(score, "maxCombo")) ?? 0),
                     FullCombo = JsonRead.Bool(JsonRead.Prop(score, "fullCombo")) ?? false,
+                    ScoreId = source == PbSource.BeatLeader ? JsonRead.Long(JsonRead.Prop(score, "id")) : null,
                 };
                 return PersonalBestParseStatus.Found;
             }

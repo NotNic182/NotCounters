@@ -13,6 +13,7 @@ namespace NotCounters.Services
 
             container.BindInterfacesTo<PlayerAccountService>().AsSingle();
             container.BindInterfacesTo<RemotePersonalBestService>().AsSingle();
+            container.BindInterfacesTo<PersonalBestLineService>().AsSingle();
         }
 
         public static void InstallMenu(DiContainer container)

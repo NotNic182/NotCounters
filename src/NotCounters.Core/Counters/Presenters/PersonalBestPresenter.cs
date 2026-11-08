@@ -28,7 +28,7 @@ namespace NotCounters.Core.Counters.Presenters
                         OptionBuilder.Item(CounterChoices.PbSourceLocal, "Local (this game)"),
                         OptionBuilder.Item(CounterChoices.PbSourceBeatLeader, "BeatLeader"),
                         OptionBuilder.Item(CounterChoices.PbSourceScoreSaber, "ScoreSaber")),
-                    OptionBuilder.Bool(CounterOptionKeys.ShowAccuracy, "Show PB accuracy", true, "Show the accuracy of your personal best. With \"Show PB score\" also off, it is shown anyway."),
+                    OptionBuilder.Bool(CounterOptionKeys.ShowAccuracy, "Show PB accuracy", true, "Show your PB's accuracy. With PB over time on, turn this and \"Show PB score\" off to see only the difference."),
                     OptionBuilder.Bool(CounterOptionKeys.ShowScore, "Show PB score", false, "Show the score of your personal best."),
                     OptionBuilder.Grouping(CounterChoices.GroupingSpace),
                     OptionBuilder.Bool(CounterOptionKeys.ShowDelta, "Show difference", true, "Show under your PB how far your current accuracy is above (+) or below (-) it."),
@@ -63,6 +63,8 @@ namespace NotCounters.Core.Counters.Presenters
             var decimals = Decimals(settings);
             var showAccuracy = CounterOptions.GetBool(settings, CounterOptionKeys.ShowAccuracy);
             var showScore = CounterOptions.GetBool(settings, CounterOptionKeys.ShowScore);
+            var overTime = CounterOptions.GetBool(settings, CounterOptionKeys.AtThisPoint);
+            var differenceOnly = overTime && showDelta && !showAccuracy && !showScore;
             if (!showAccuracy && !showScore)
             {
                 showAccuracy = true;
@@ -71,9 +73,17 @@ namespace NotCounters.Core.Counters.Presenters
             var current = source == PbSource.Local ? stats.ModifiedRelativeScore : stats.Accuracy;
             var playing = current.HasValue && NumberFormatting.IsFinite(current.Value);
             double? pbRaw = NumberFormatting.IsFinite(pb.Accuracy) ? pb.Accuracy : (double?)null;
-            if (playing && pb.Line != null && CounterOptions.GetBool(settings, CounterOptionKeys.AtThisPoint))
+            if (playing && pb.Line != null && overTime)
             {
                 pbRaw = pb.Line.At(stats.SongTime) ?? pbRaw;
+            }
+
+            double? points = playing && pbRaw.HasValue ? (current.GetValueOrDefault() - pbRaw.Value) * 100d : (double?)null;
+            if (differenceOnly)
+            {
+                return points.HasValue
+                    ? new CounterRender(NumberFormatting.SignedPercentPoints(points.Value, decimals), labelOverride, DeltaColor(points.Value, decimals))
+                    : new CounterRender(NoData, labelOverride);
             }
 
             double? pbAccuracy = pbRaw.HasValue ? Clamp01(pbRaw.Value) : (double?)null;
@@ -86,16 +96,17 @@ namespace NotCounters.Core.Counters.Presenters
             }
 
             var color = RankColor(pbAccuracy);
-            if (showDelta && playing && pbRaw.HasValue)
+            if (showDelta && points.HasValue)
             {
-                var points = (current.GetValueOrDefault() - pbRaw.Value) * 100d;
-                var delta = NumberFormatting.SignedPercentPoints(points, decimals);
-                var deltaColor = CounterColors.ForDelta(NumberFormatting.RoundForDisplay(points, decimals));
-                return new CounterRender(text, labelOverride, color, detail: delta, detailColor: deltaColor, reservesDetail: true);
+                var delta = NumberFormatting.SignedPercentPoints(points.Value, decimals);
+                return new CounterRender(text, labelOverride, color, detail: delta, detailColor: DeltaColor(points.Value, decimals), reservesDetail: true);
             }
 
             return new CounterRender(text, labelOverride, color, reservesDetail: showDelta);
         }
+
+        private static ColorValue DeltaColor(double points, int decimals) =>
+            CounterColors.ForDelta(NumberFormatting.RoundForDisplay(points, decimals));
 
         private static PersonalBestInfo? Resolve(StatsSnapshot stats, IReadOnlyList<PbSource> candidates, out PbSource source)
         {

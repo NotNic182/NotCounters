@@ -25,7 +25,9 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.PerHand("Split the count into left and right saber."),
                     OptionBuilder.SeparateLines(),
                     OptionBuilder.HandLetters(),
-                    OptionBuilder.SaberColors(),
+                    OptionBuilder.HandColors(),
+                    OptionBuilder.LeftColor(),
+                    OptionBuilder.RightColor(),
                 },
             })
         {

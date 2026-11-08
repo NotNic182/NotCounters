@@ -26,7 +26,9 @@ namespace NotCounters.Core.Counters.Presenters
                     OptionBuilder.PerHand("Show the left and right saber separately."),
                     OptionBuilder.SeparateLines(),
                     OptionBuilder.HandLetters(),
-                    OptionBuilder.SaberColors(),
+                    OptionBuilder.HandColors(),
+                    OptionBuilder.LeftColor(),
+                    OptionBuilder.RightColor(),
                     OptionBuilder.ShowUnit("ms"),
                 },
             })

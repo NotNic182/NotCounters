@@ -21,9 +21,21 @@ namespace NotCounters.Core.Counters.Presenters
         public static HandLook For(StatsSnapshot stats, CounterSettings settings)
         {
             var letters = CounterOptions.GetBool(settings, CounterOptionKeys.HandLetters);
-            ColorValue? left = stats.Left.SaberColor;
-            ColorValue? right = stats.Right.SaberColor;
-            if (!left.HasValue || !right.HasValue || !CounterOptions.GetBool(settings, CounterOptionKeys.SaberColors))
+            ColorValue? left = null;
+            ColorValue? right = null;
+            switch (CounterOptions.GetChoice(settings, CounterOptionKeys.HandColors))
+            {
+                case CounterChoices.HandColorsSabers:
+                    left = stats.Left.SaberColor;
+                    right = stats.Right.SaberColor;
+                    break;
+                case CounterChoices.HandColorsCustom:
+                    left = CounterOptions.GetColor(settings, CounterOptionKeys.LeftColor);
+                    right = CounterOptions.GetColor(settings, CounterOptionKeys.RightColor);
+                    break;
+            }
+
+            if (!left.HasValue || !right.HasValue)
             {
                 return new HandLook(letters, null, null);
             }

@@ -56,7 +56,15 @@ namespace NotCounters.Core.Counters
 
         public const string HandLetters = "handLetters";
 
-        public const string SaberColors = "saberColors";
+        public const string HandColors = "handColors";
+
+        public const string LeftColor = "leftColor";
+
+        public const string RightColor = "rightColor";
+
+        public const string AheadColor = "aheadColor";
+
+        public const string BehindColor = "behindColor";
 
         public const string RecentCount = "recentCount";
 

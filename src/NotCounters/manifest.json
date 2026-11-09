@@ -10,5 +10,8 @@
     "BSIPA": "^4.3.0",
     "BeatSaberMarkupLanguage": "^1.12.5",
     "SiraUtil": "^3.2.1"
+  },
+  "conflictsWith": {
+    "Counters+": "*"
   }
 }

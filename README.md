@@ -15,6 +15,8 @@ the actual game environment, so you see exactly what it looks like in play.
 
 Needs BSIPA, BSML and SiraUtil.
 
+Not compatible with Counters+, so remove that first if you have it.
+
 Drop `NotCounters.dll` in your `Plugins` folder, then hit **NotCounters** in the MODS panel in the main menu.
 
 Settings are saved in `UserData/NotCounters/`.

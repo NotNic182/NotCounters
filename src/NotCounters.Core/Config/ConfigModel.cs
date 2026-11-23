@@ -29,7 +29,7 @@ namespace NotCounters.Core.Config
 
         public bool EnableScoreSaber { get; set; } = true;
 
-        public string BeatLeaderApiBaseUrl { get; set; } = "https://api.beatleader.xyz";
+        public string BeatLeaderApiBaseUrl { get; set; } = "https://api.beatleader.com";
 
         public string ScoreSaberApiBaseUrl { get; set; } = "https://scoresaber.com";
 

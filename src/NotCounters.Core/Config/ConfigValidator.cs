@@ -104,6 +104,9 @@ namespace NotCounters.Core.Config
             global.BeatLeaderPlayerId = NullIfBlank(global.BeatLeaderPlayerId, "global.beatLeaderPlayerId", warnings);
             global.ScoreSaberPlayerId = NullIfBlank(global.ScoreSaberPlayerId, "global.scoreSaberPlayerId", warnings);
             global.BeatLeaderApiBaseUrl = HttpUrlOrDefault(global.BeatLeaderApiBaseUrl, GlobalDefaults.BeatLeaderApiBaseUrl, "global.beatLeaderApiBaseUrl", warnings);
+            // api.beatleader.xyz stopped resolving; move configs still saved with it to .com.
+            if (IsOldBeatLeaderHost(global.BeatLeaderApiBaseUrl))
+                global.BeatLeaderApiBaseUrl = GlobalDefaults.BeatLeaderApiBaseUrl;
             global.ScoreSaberApiBaseUrl = HttpUrlOrDefault(global.ScoreSaberApiBaseUrl, GlobalDefaults.ScoreSaberApiBaseUrl, "global.scoreSaberApiBaseUrl", warnings);
             global.LeaderboardCacheHours = Clamp(global.LeaderboardCacheHours, MinLeaderboardCacheHours, MaxLeaderboardCacheHours, GlobalDefaults.LeaderboardCacheHours, "global.leaderboardCacheHours", warnings);
 
@@ -596,6 +599,11 @@ namespace NotCounters.Core.Config
             warnings.Add($"{path}: \"{value}\" is not an http(s) address; reset to {fallback}.");
             return fallback;
         }
+
+        private static bool IsOldBeatLeaderHost(string? url) =>
+            url != null
+            && Uri.TryCreate(url.Trim(), UriKind.Absolute, out Uri? uri)
+            && uri.Host.Equals("api.beatleader.xyz", StringComparison.OrdinalIgnoreCase);
 
         private static string Format(IFormattable value) => value.ToString(null, CultureInfo.InvariantCulture);
     }

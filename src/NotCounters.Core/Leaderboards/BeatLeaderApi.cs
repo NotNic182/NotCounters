@@ -5,7 +5,7 @@ namespace NotCounters.Core.Leaderboards
 {
     public sealed class BeatLeaderApi
     {
-        public const string DefaultBaseUrl = "https://api.beatleader.xyz";
+        public const string DefaultBaseUrl = "https://api.beatleader.com";
 
         public BeatLeaderApi(string? baseUrl = null)
         {
